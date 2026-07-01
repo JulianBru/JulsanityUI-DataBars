@@ -1,7 +1,7 @@
 ## Interface: 120000, 120001, 120005, 120007
 ## Title: |cff0cd29fJulsanityUI|r DataBars
 ## Notes: ElvUI-style configurable data texts, native to EllesmereUI's look & feel
-## Author: Julsanity
+## Author: Julsanity (CheersItsJulian)
 ## Version: 1.5
 ## X-Curse-Project-ID: 1594567
 ## Dependencies: EllesmereUI
