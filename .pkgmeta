@@ -1,0 +1,18 @@
+# BigWigsMods packager configuration.
+# https://github.com/BigWigsMods/packager
+
+package-as: JulsanityUI_DataBars
+
+# No embedded libraries in this addon, so no nolib build is needed.
+enable-nolib-creation: no
+
+# Files/folders kept in the repo but excluded from the published zip.
+ignore:
+  - _ref
+  - .github
+  - .vscode
+  - .claude
+  - .gitignore
+  - .pkgmeta
+  - JulsanityUI_Logo.png
+  - JulsanityUI_Logo_cropped.png

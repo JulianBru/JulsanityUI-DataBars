@@ -1,0 +1,48 @@
+# ------------------------------------------------------------------------------
+#  JulsanityUI DataBars - .gitignore
+# ------------------------------------------------------------------------------
+
+# Reference copies of third-party addons (EllesmereUI, Syndicator, etc.).
+# Kept locally as a development/API reference only - never published.
+_ref/
+/_ref
+
+# Editor / IDE / tooling
+.vscode/
+.idea/
+*.code-workspace
+.claude/
+
+# OS clutter
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# WoW SavedVariables / runtime artifacts (should never be in the repo)
+*.bak
+SavedVariables/
+WTF/
+
+# Build / packaging artifacts
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+/dist/
+/build/
+/.release/
+/.packager/
+
+# Logs & temp
+*.log
+*.tmp
+*~
+
+# Local docs (architecture notes, dev guides) - not published
+docs/

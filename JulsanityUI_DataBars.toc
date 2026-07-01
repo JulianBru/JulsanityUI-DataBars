@@ -1,0 +1,37 @@
+## Interface: 120000, 120001, 120005, 120007
+## Title: |cff0cd29fJulsanityUI|r DataBars
+## Notes: ElvUI-style configurable data texts, native to EllesmereUI's look & feel
+## Author: Julsanity
+## Version: 1.5
+## X-Curse-Project-ID: 000000
+## Dependencies: EllesmereUI
+## OptionalDeps: Syndicator
+## SavedVariables: JulsanityDataBarsDB
+## IconTexture: Interface\AddOns\EllesmereUI\media\eg-logo.tga
+
+Core\Init.lua
+Locales\enUS.lua
+Locales\deDE.lua
+Utils\Utils.lua
+Utils\Debug.lua
+API\Events.lua
+Core\Database.lua
+Integration\EllesmereUI.lua
+DataTexts\Engine.lua
+DataTexts\Registry.lua
+DataTexts\DT_System.lua
+DataTexts\DT_Character.lua
+DataTexts\DT_Social.lua
+DataTexts\DT_PvE.lua
+DataTexts\DT_Difficulty.lua
+Modules\Slot.lua
+Modules\Renderer.lua
+Modules\Anchor.lua
+Modules\Visibility.lua
+Modules\Bar.lua
+API\API.lua
+Config\ImportExport.lua
+Config\Profiles.lua
+Config\Options.lua
+Config\Window.lua
+Core\Core.lua

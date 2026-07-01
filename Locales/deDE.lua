@@ -1,0 +1,108 @@
+--------------------------------------------------------------------------------
+--  Locales/deDE.lua  -  German translations
+--------------------------------------------------------------------------------
+local _, ns = ...
+if GetLocale() ~= "deDE" then return end
+
+local L = ns.L
+
+-- Sections
+L["Layout"]            = "Layout"
+L["Appearance"]        = "Aussehen"
+L["Behavior"]          = "Verhalten"
+L["Advanced"]          = "Erweitert"
+
+-- Layout
+L["Width"]             = "Breite"
+L["Width Offset"]      = "Breiten-Offset"
+L["Height"]            = "Hoehe"
+L["Padding"]           = "Innenabstand"
+L["Margin"]            = "Aussenabstand"
+L["Spacing"]           = "Abstand"
+L["Orientation"]       = "Ausrichtung"
+L["Growth Direction"]  = "Wachstumsrichtung"
+L["Auto Size"]         = "Automatische Groesse"
+L["Horizontal"]        = "Horizontal"
+L["Vertical"]          = "Vertikal"
+L["Left"]              = "Links"
+L["Right"]             = "Rechts"
+L["Up"]                = "Oben"
+L["Down"]              = "Unten"
+
+-- Appearance
+L["Font"]              = "Schriftart"
+L["Font Size"]         = "Schriftgroesse"
+L["Font Outline"]      = "Schriftkontur"
+L["Text Color"]        = "Textfarbe"
+L["Background Color"]  = "Hintergrundfarbe"
+L["Background Texture"] = "Hintergrundtextur"
+L["Solid Color"]       = "Einfarbig"
+L["Border"]            = "Rahmen"
+L["Border Size"]       = "Rahmenstaerke"
+L["Border Color"]      = "Rahmenfarbe"
+L["Shadow"]            = "Schatten"
+L["Transparency"]      = "Transparenz"
+L["Mouseover Fade"]    = "Einblenden bei Mouseover"
+L["Faded Alpha"]       = "Transparenz (ausgeblendet)"
+L["Auto Hide"]         = "Automatisch ausblenden"
+L["None"]              = "Keine"
+L["Outline"]           = "Kontur"
+L["Thick Outline"]     = "Dicke Kontur"
+
+-- Behavior
+L["Number of DataTexts"] = "Anzahl der DataTexts"
+L["DataText"]          = "DataText"
+L["Lock Position"]     = "Position sperren"
+L["Snap"]              = "Einrasten"
+
+-- Advanced
+L["Debug Mode"]        = "Debug-Modus"
+L["Reload UI"]         = "UI neu laden"
+L["Reset Position"]    = "Position zuruecksetzen"
+L["Reset Profile"]     = "Profil zuruecksetzen"
+L["Export Profile"]    = "Profil exportieren"
+L["Import Profile"]    = "Profil importieren"
+L["Profiles"]          = "Profile"
+L["New Profile"]       = "Neues Profil"
+L["Copy Profile"]      = "Profil kopieren"
+L["Delete Profile"]    = "Profil loeschen"
+
+-- Difficulty datatext
+L["Difficulty"]               = "Schwierigkeit"
+L["Dungeon"]                  = "Dungeon"
+L["Raid"]                     = "Schlachtzug"
+L["Dungeon Difficulty"]       = "Dungeon-Schwierigkeit"
+L["Raid Difficulty"]          = "Schlachtzug-Schwierigkeit"
+L["Click to change difficulty."] = "Klicken zum Aendern der Schwierigkeit."
+L["Active Profile"]    = "Aktives Profil"
+
+-- Specialization datatext (loot spec)
+L["Loot Specialization"]            = "Beutespezialisierung"
+L["Current Specialization"]         = "Aktuelle Spezialisierung"
+L["Left-click: open specialization"] = "Linksklick: Spezialisierung oeffnen"
+L["Right-click: set loot spec"]     = "Rechtsklick: Beutespez. waehlen"
+
+-- Gold datatext (Syndicator cross-character)
+L["Silver"]            = "Silber"
+L["Copper"]            = "Kupfer"
+L["Alliance"]          = "Allianz"
+L["Horde"]             = "Horde"
+L["Neutral"]           = "Neutral"
+L["Warband Bank"]      = "Kriegsmeute-Bank"
+L["Total"]             = "Gesamt"
+L["Characters"]        = "Charaktere"
+
+-- Multi-bar controls
+L["Bar"]               = "Leiste"
+L["Enabled"]           = "Aktiviert"
+L["Main Bar"]          = "Hauptleiste"
+L["Minimap Bar"]       = "Minimap-Leiste"
+
+-- Loot Spec datatext
+L["Loot Spec"]                        = "Beutespez."
+L["Left-click: set loot spec"]        = "Linksklick: Beutespez. waehlen"
+L["Right-click: open specialization"] = "Rechtsklick: Spezialisierung oeffnen"
+
+-- Blizzard AddOns options panel
+L["Open Configuration"] = "Konfiguration oeffnen"
+L["ElvUI-style configurable data texts, native to EllesmereUI."] = "Konfigurierbare DataTexts im ElvUI-Stil, nativ fuer EllesmereUI."
