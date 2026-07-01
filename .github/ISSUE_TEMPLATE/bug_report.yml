@@ -1,0 +1,96 @@
+name: Bug Report
+description: Report a problem with JulsanityUI DataBars
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the fields below so it can be reproduced and fixed quickly.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Before you start
+      options:
+        - label: I am on Retail WoW (Classic is not supported).
+          required: true
+        - label: EllesmereUI is installed and up to date.
+          required: true
+        - label: I searched existing issues and this hasn't been reported yet.
+          required: true
+        - label: I tested with only JulsanityUI DataBars + EllesmereUI enabled (all other addons disabled).
+          required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+      placeholder: When I ..., the bar ...
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: How can this be reproduced?
+      placeholder: |
+        1. Open the config with /jdbar
+        2. Switch to the Minimap bar
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      placeholder: I expected ...
+    validations:
+      required: true
+  - type: textarea
+    id: lua-error
+    attributes:
+      label: Lua error (if any)
+      description: Paste the full error. Enabling `/console scriptErrors 1` or an error addon (BugSack/BugGraber) helps.
+      render: text
+    validations:
+      required: false
+  - type: input
+    id: addon-version
+    attributes:
+      label: JulsanityUI DataBars version
+      placeholder: e.g. 1.5
+    validations:
+      required: true
+  - type: input
+    id: wow-version
+    attributes:
+      label: WoW version / build
+      placeholder: e.g. 11.x.x (Retail)
+    validations:
+      required: true
+  - type: input
+    id: eui-version
+    attributes:
+      label: EllesmereUI version
+      placeholder: e.g. x.y.z
+    validations:
+      required: false
+  - type: dropdown
+    id: gold-source
+    attributes:
+      label: Do you use a gold-tracking addon?
+      description: Relevant for the Gold DataText tooltip.
+      options:
+        - "No"
+        - "Syndicator / Baganator"
+        - "EllesmereUI Bags"
+        - "Other / not sure"
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag & drop images here if it helps illustrate the problem.
+    validations:
+      required: false

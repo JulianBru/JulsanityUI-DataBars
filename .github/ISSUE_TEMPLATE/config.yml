@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: JulsanityUI DataBars on CurseForge
+    url: https://www.curseforge.com/wow/addons/julsanityui-databars
+    about: Downloads, changelog and general comments.
+  - name: EllesmereUI (dependency)
+    url: https://www.curseforge.com/wow/addons/ellesmereui
+    about: Issues with EllesmereUI itself belong to EllesmereUI, not this addon.
