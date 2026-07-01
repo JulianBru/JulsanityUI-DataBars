@@ -3,7 +3,7 @@
 ## Notes: ElvUI-style configurable data texts, native to EllesmereUI's look & feel
 ## Author: Julsanity
 ## Version: 1.5
-## X-Curse-Project-ID: 000000
+## X-Curse-Project-ID: 1594567
 ## Dependencies: EllesmereUI
 ## OptionalDeps: Syndicator
 ## SavedVariables: JulsanityDataBarsDB
