@@ -106,3 +106,6 @@ L["Right-click: open specialization"] = "Rechtsklick: Spezialisierung oeffnen"
 -- Blizzard AddOns options panel
 L["Open Configuration"] = "Konfiguration oeffnen"
 L["ElvUI-style configurable data texts, native to EllesmereUI."] = "Konfigurierbare DataTexts im ElvUI-Stil, nativ fuer EllesmereUI."
+
+-- Config window header
+L["Unlock Mode"]       = "Entsperrmodus"

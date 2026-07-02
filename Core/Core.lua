@@ -2,9 +2,8 @@
 --  Core/Core.lua  -  Lifecycle boot + slash commands
 --
 --  Loaded last. OnInitialize (ADDON_LOADED) inits the database; OnEnable
---  (PLAYER_LOGIN) builds every bar, registers anchors, draws everything, and
---  registers the (optional) EllesmereUI sidebar entry. /jdbar opens the
---  standalone options window (no EllesmereUI patch required).
+--  (PLAYER_LOGIN) builds every bar, registers anchors and draws everything.
+--  /jdbar opens the standalone options window (no EllesmereUI patch required).
 --------------------------------------------------------------------------------
 local _, ns = ...
 local addon = ns.addon
@@ -24,7 +23,6 @@ function addon:OnEnable()
         ns.Bar.Layout(bar)
         ns.Visibility:ApplyOne(bar)
     end)
-    if ns.Config.Register then ns.Config:Register() end   -- bonus EUI sidebar entry
     if ns.Window and ns.Window.RegisterCategory then ns.Window:RegisterCategory() end  -- Blizzard Options > AddOns
     D.Log("enabled - %d bars, %d datatexts available", #ns.Bars, ns.Registry:Count())
 end

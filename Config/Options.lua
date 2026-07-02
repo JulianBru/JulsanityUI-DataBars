@@ -8,7 +8,6 @@
 --  Advanced is profile-global (profiles, import/export, debug). Pages are
 --  exposed via ns.Config.BuildPage / ns.Config.PAGES so both hosts can use them:
 --    * the standalone window (Config/Window.lua),
---    * the EllesmereUI sidebar entry (RegisterModule, when whitelisted).
 --------------------------------------------------------------------------------
 local _, ns = ...
 local Config = ns.Config
@@ -34,8 +33,6 @@ local function cfg() return ns.BarCfg(Config.currentBar) end
 function Config:RefreshOpen()
     if ns.Window and ns.Window.IsShown and ns.Window:IsShown() then
         ns.Window:RebuildCurrent()
-    elseif EllesmereUI and EllesmereUI.RefreshPage then
-        EllesmereUI:RefreshPage(true)
     end
 end
 
@@ -249,7 +246,7 @@ local function BuildAdvanced(parent, y)
 end
 
 --------------------------------------------------------------------------------
---  Shared page dispatch (used by both the window and the EUI sidebar)
+--  Shared page dispatch (used by the standalone options window)
 --------------------------------------------------------------------------------
 Config.PAGES = { PAGE_LAYOUT, PAGE_APPEARANCE, PAGE_BEHAVIOR, PAGE_ADVANCED }
 
@@ -265,22 +262,4 @@ function Config.BuildPage(pageName, parent, yOffset)
         y = BuildAdvanced(parent, y)
     end
     return abs(y) + 20
-end
-
---------------------------------------------------------------------------------
---  EllesmereUI sidebar registration (bonus path; no-op unless whitelisted)
---------------------------------------------------------------------------------
-function Config:Register()
-    ns.EUI:RegisterConfigModule({
-        title       = "DataBars",
-        description = "ElvUI-style data texts, native to EllesmereUI.",
-        pages       = Config.PAGES,
-        buildPage   = function(pageName, parent, yOffset)
-            return Config.BuildPage(pageName, parent, yOffset)
-        end,
-        onReset = function()
-            ns.DB:ResetActive()
-            if EllesmereUI.RefreshPage then EllesmereUI:RefreshPage(true) end
-        end,
-    })
 end

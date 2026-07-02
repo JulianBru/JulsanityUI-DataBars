@@ -4,7 +4,7 @@
 --  Wraps every EllesmereUI touch-point behind a small, stable facade so that a
 --  change in EllesmereUI affects exactly one file. All calls are defensive: a
 --  missing API degrades gracefully instead of erroring. Bound against the
---  verified EllesmereUI source (Lite, RegisterModule, accent/font helpers,
+--  verified EllesmereUI source (Lite, accent/font helpers,
 --  LibSharedMedia from EllesmereUI's bundled Libs).
 --------------------------------------------------------------------------------
 local _, ns = ...
@@ -97,19 +97,19 @@ function EUI:GetStatusbarList()
 end
 
 --------------------------------------------------------------------------------
---  Config panel module registration
+--  Unlock / Edit mode
 --------------------------------------------------------------------------------
 
---- Register the addon's config module in the EllesmereUI sidebar. Requires the
---- folder to be on EllesmereUI's allow-list (added by the install patch). If the
---- API or allow-list entry is missing, the call is a safe no-op and we log it.
-function EUI:RegisterConfigModule(config)
-    if not (EllesmereUI and EllesmereUI.RegisterModule) then
-        D.Log("EllesmereUI:RegisterModule unavailable; config panel not registered")
-        return false
-    end
-    EllesmereUI:RegisterModule(ns.FOLDER, config)
-    D.Log("registered EllesmereUI config module")
+--- Is EllesmereUI's Unlock-mode toggle available?
+function EUI:IsUnlockAvailable()
+    return (EllesmereUI and type(EllesmereUI.ToggleUnlockMode) == "function") and true or false
+end
+
+--- Open EllesmereUI's Unlock/Edit mode (no-op if already active or unavailable).
+function EUI:OpenUnlock()
+    if not (EllesmereUI and EllesmereUI.ToggleUnlockMode) then return false end
+    if EllesmereUI.IsUnlockModeActive and EllesmereUI.IsUnlockModeActive() then return true end
+    EllesmereUI:ToggleUnlockMode()
     return true
 end
 

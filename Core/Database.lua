@@ -58,7 +58,7 @@ local function BaseBar()
         },
         behavior = {
             numSlots     = 5,
-            slots        = { "Time", "Coordinates", "Gold", "Durability", "System" },
+            slots        = { "Friends", "Difficulty", "Loot Spec", "Gold", "Durability" },
             lockPosition = false,
             snap         = true,
         },
@@ -73,8 +73,8 @@ local function DefaultProfile()
     local mm = BaseBar()
     mm.attach            = "minimap"          -- sit under the minimap by default
     mm.layout.width      = 200
-    mm.behavior.numSlots = 3
-    mm.behavior.slots    = { "Time", "Durability", "System" }
+    mm.behavior.numSlots = 2
+    mm.behavior.slots    = { "System", "Guild" }
     -- Fallback position (used only if the player detaches it from the minimap).
     mm.position          = { point = "TOP", relPoint = "CENTER", x = 0, y = 0 }
 

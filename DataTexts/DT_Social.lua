@@ -28,7 +28,7 @@ Reg({
     },
     update = function(slot)
         local wowOnline, _, bnOnline = FriendCounts()
-        slot.text:SetFormattedText("|cff%s%d|r |cffaaaaaafriends|r", AccentHex(), wowOnline + bnOnline)
+        slot.text:SetFormattedText("|cffaaaaaaFriends:|r |cff%s%d|r", AccentHex(), wowOnline + bnOnline)
     end,
     enter = function(slot)
         local wowOnline, wowTotal, bnOnline, bnTotal = FriendCounts()
@@ -59,7 +59,7 @@ Reg({
         end
         if C_GuildInfo and C_GuildInfo.GuildRoster then C_GuildInfo.GuildRoster() end
         local _, online = GetNumGuildMembers()
-        slot.text:SetFormattedText("|cff%s%d|r |cffaaaaaaguild|r", AccentHex(), online or 0)
+        slot.text:SetFormattedText("|cffaaaaaaGuild:|r |cff%s%d|r", AccentHex(), online or 0)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)

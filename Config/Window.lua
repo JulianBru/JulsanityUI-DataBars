@@ -129,6 +129,44 @@ function Window:Build()
     close:SetScript("OnLeave", function() x:SetTextColor(0.7, 0.7, 0.7, 1) end)
     close:SetScript("OnClick", function() f:Hide() end)
 
+    -- Unlock-mode button (EllesmereUI-styled): closes this window and opens
+    -- EllesmereUI Unlock/Edit mode so the user can drag the bars. Hidden if
+    -- EllesmereUI exposes no unlock toggle.
+    local uar, uag, uab = Accent()
+    local unlock = CreateFrame("Button", nil, f)
+    unlock:SetHeight(24)
+
+    local ubg = unlock:CreateTexture(nil, "BACKGROUND")
+    ubg:SetAllPoints()
+    ubg:SetColorTexture(0.11, 0.13, 0.15, 0.9)
+
+    if EllesmereUI and EllesmereUI.PP and EllesmereUI.PP.CreateBorder then
+        EllesmereUI.PP.CreateBorder(unlock, uar, uag, uab, 0.35, 1, "OVERLAY", 7)
+    end
+
+    local ul = unlock:CreateFontString(nil, "OVERLAY")
+    ul:SetFont(FontPath(), 12, "")
+    ul:SetText(ns.L["Unlock Mode"])
+    ul:SetPoint("CENTER")
+    ul:SetTextColor(0.85, 0.85, 0.85, 1)
+
+    unlock:SetWidth((ul:GetStringWidth() or 90) + 22)
+    unlock:SetPoint("RIGHT", close, "LEFT", -12, 0)
+
+    unlock:SetScript("OnEnter", function()
+        ubg:SetColorTexture(uar * 0.35, uag * 0.35, uab * 0.35, 0.9)
+        ul:SetTextColor(1, 1, 1, 1)
+    end)
+    unlock:SetScript("OnLeave", function()
+        ubg:SetColorTexture(0.11, 0.13, 0.15, 0.9)
+        ul:SetTextColor(0.85, 0.85, 0.85, 1)
+    end)
+    unlock:SetScript("OnClick", function()
+        f:Hide()
+        ns.EUI:OpenUnlock()
+    end)
+    if not ns.EUI:IsUnlockAvailable() then unlock:Hide() end
+
     -- Divider under header
     local div = f:CreateTexture(nil, "ARTWORK")
     div:SetColorTexture(1, 1, 1, 0.08)
