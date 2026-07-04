@@ -55,8 +55,13 @@ Reg({
     events = { "PLAYER_DIFFICULTY_CHANGED", "UPDATE_INSTANCE_INFO", "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE" },
     update = function(slot)
         local hex = AccentHex()
-        slot.text:SetFormattedText("|cffaaaaaaDiff|r |cff%s%s|r|cffaaaaaa/|r|cff%s%s|r",
-            hex, ABBR[CurDungeon()] or "?", hex, ABBR[CurRaid()] or "?")
+        if ns.WantPrefix(slot) then
+            slot.text:SetFormattedText("|cffaaaaaaDiff|r |cff%s%s|r|cffaaaaaa/|r|cff%s%s|r",
+                hex, ABBR[CurDungeon()] or "?", hex, ABBR[CurRaid()] or "?")
+        else
+            slot.text:SetFormattedText("|cff%s%s|r|cffaaaaaa/|r|cff%s%s|r",
+                hex, ABBR[CurDungeon()] or "?", hex, ABBR[CurRaid()] or "?")
+        end
     end,
     enter = function(slot)
         local ar, ag, ab = ns.EUI:GetAccent()

@@ -51,6 +51,10 @@ local function BaseBar()
             borderSize  = 1,
             borderColor = { 0, 0, 0, 1 },
             shadow      = true,
+            showSeparators = false,   -- thin line between slots
+            separatorUseAccent = true,   -- true = EllesmereUI accent; false = custom
+            separatorColor = { 0.5, 0.5, 0.5, 0.6 },
+            hidePrefix  = false,     -- hide datatext labels/prefixes (Dur, ilvl, ...)
             alpha       = 1.0,
             mouseoverFade = false,
             fadeAlpha   = 0.0,

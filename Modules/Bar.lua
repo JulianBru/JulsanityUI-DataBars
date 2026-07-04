@@ -123,6 +123,39 @@ end
 --------------------------------------------------------------------------------
 --  Layout (per bar)
 --------------------------------------------------------------------------------
+local function PixelMult()
+    local PP = EllesmereUI and (EllesmereUI.PanelPP or EllesmereUI.PP)
+    return (PP and PP.mult) or 1
+end
+
+-- Per-bar pool of separator textures drawn between adjacent slots.
+local function GetSeparator(bar, i)
+    bar._seps = bar._seps or {}
+    local t = bar._seps[i]
+    if not t then
+        t = bar.frame:CreateTexture(nil, "ARTWORK")
+        bar._seps[i] = t
+    end
+    return t
+end
+
+local function HideSeparatorsFrom(bar, keep)
+    if not bar._seps then return end
+    for i = keep + 1, #bar._seps do bar._seps[i]:Hide() end
+end
+
+-- Separator colour: EllesmereUI accent by default, or a custom colour when the
+-- bar opts out of the accent.
+local function SepColor(c)
+    local A = c.appearance
+    if A.separatorUseAccent == false and type(A.separatorColor) == "table" then
+        local sc = A.separatorColor
+        return sc[1] or 1, sc[2] or 1, sc[3] or 1, sc[4] or 0.6
+    end
+    local r, g, b = ns.EUI:GetAccent()
+    return r, g, b, 0.6
+end
+
 local function ContentWidth(slot)
     local w = (slot and slot.text and slot.text:GetStringWidth() or 0) + TEXT_PAD * 2
     return max(w, MIN_SLOT_W)
@@ -166,8 +199,27 @@ function Bar.Layout(bar)
                 slot:ClearAllPoints()
                 slot:SetPoint("TOPLEFT", f, "TOPLEFT", cursor, -pad)
                 slot:SetSize(widths[idx], slotH)
+                slot:SetHitRectInsets(-sp / 2, -sp / 2, -pad, -pad)
             end
             cursor = cursor + widths[idx] + sp
+        end
+
+        -- Section separators: thin vertical lines between adjacent slots.
+        if c.appearance.showSeparators and n > 1 then
+            local ar, ag, ab, aa = SepColor(c)
+            local mult = PixelMult()
+            for p = 1, n - 1 do
+                local sx = pad + p * w + (p - 1) * sp + sp / 2
+                local t = GetSeparator(bar, p)
+                t:SetColorTexture(ar, ag, ab, aa)
+                t:ClearAllPoints()
+                t:SetSize(mult, slotH)
+                t:SetPoint("TOPLEFT", f, "TOPLEFT", sx - mult / 2, -pad)
+                t:Show()
+            end
+            HideSeparatorsFrom(bar, n - 1)
+        else
+            HideSeparatorsFrom(bar, 0)
         end
     else
         local slotH = max(L.height or 22, 4)
@@ -196,8 +248,28 @@ function Bar.Layout(bar)
                 slot:ClearAllPoints()
                 slot:SetPoint("TOPLEFT", f, "TOPLEFT", pad, -cursor)
                 slot:SetSize(widths[idx], slotH)
+                slot:SetHitRectInsets(-pad, -pad, -sp / 2, -sp / 2)
             end
             cursor = cursor + slotH + sp
+        end
+
+        -- Section separators: thin horizontal lines between adjacent slots.
+        if c.appearance.showSeparators and n > 1 then
+            local ar, ag, ab, aa = SepColor(c)
+            local mult = PixelMult()
+            local sepW = max(barW - 2 * pad, 1)
+            for p = 1, n - 1 do
+                local sy = pad + p * slotH + (p - 1) * sp + sp / 2
+                local t = GetSeparator(bar, p)
+                t:SetColorTexture(ar, ag, ab, aa)
+                t:ClearAllPoints()
+                t:SetSize(sepW, mult)
+                t:SetPoint("TOPLEFT", f, "TOPLEFT", pad, -(sy - mult / 2))
+                t:Show()
+            end
+            HideSeparatorsFrom(bar, n - 1)
+        else
+            HideSeparatorsFrom(bar, 0)
         end
     end
 

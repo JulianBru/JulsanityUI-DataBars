@@ -3,6 +3,33 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.6] — 2026-07-04
+
+Quality-of-life features, its own identity, and a first-login fix.
+
+### Added
+- **About tab** documenting that this is an independent plugin for EllesmereUI
+  (not part of the suite, no support in the EllesmereUI Discord), with buttons
+  for CurseForge, GitHub, and an in-game Changelog viewer.
+- **Section separators** — optional thin lines between datatexts, using the
+  EllesmereUI accent or a custom colour.
+- **Hide Prefixes** option (Behavior) to drop labels like "Dur" or "ilvl" and
+  show just the value.
+- The **main bar width can now span the full screen** (the limit follows your
+  resolution / UI scale instead of a fixed 1200 px).
+
+### Changed
+- New first-run layout — Main bar: Friends, Difficulty, Loot Spec, Gold,
+  Durability; Minimap bar: FPS, Guild.
+- Friends and Guild now read as "Friends: 15" / "Guild: 2".
+- Own addon icon and JulsanityUI branding colour in the addon list, to make
+  clear this is a standalone plugin rather than part of EllesmereUI.
+- Removed the EllesmereUI options-sidebar entry — the standalone window and the
+  Options → AddOns button cover configuration.
+
+### Fixed
+- Accent colour could be wrong right after login until an option was toggled; it now updates as soon as         EllesmereUI applies the saved accent.
+
 ## [1.5] — 2026-07-01
 
 Blizzard options integration & housekeeping.

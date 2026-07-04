@@ -1,13 +1,13 @@
 ## Interface: 120000, 120001, 120005, 120007
-## Title: |cff0cd29fJulsanityUI|r DataBars
+## Title: |cffad00ffJulsanityUI|r DataBars
 ## Notes: ElvUI-style configurable data texts, native to EllesmereUI's look & feel
 ## Author: Julsanity (CheersItsJulian)
-## Version: 1.5
+## Version: 1.6
 ## X-Curse-Project-ID: 1594567
 ## Dependencies: EllesmereUI
 ## OptionalDeps: Syndicator
 ## SavedVariables: JulsanityDataBarsDB
-## IconTexture: Interface\AddOns\EllesmereUI\media\eg-logo.tga
+## IconTexture: Interface\AddOns\JulsanityUI_DataBars\Media\JulsanityUI.tga
 
 Core\Init.lua
 Locales\enUS.lua

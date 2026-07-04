@@ -145,7 +145,8 @@ Reg({
             return
         end
         slot._duraTries = 0
-        slot.text:SetFormattedText("|cff%sDur %d%%|r", StatusHex(lowest, 60, 30, false), lowest)
+        local pre = ns.WantPrefix(slot) and "Dur " or ""
+        slot.text:SetFormattedText("|cff%s%s%d%%|r", StatusHex(lowest, 60, 30, false), pre, lowest)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)

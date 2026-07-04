@@ -219,7 +219,8 @@ Reg({
         if not GetAverageItemLevel then slot.text:SetText("N/A"); return end
         local _, equipped = GetAverageItemLevel()
         if not equipped then slot.text:SetText("N/A"); return end
-        slot.text:SetFormattedText("|cff%s%.0f ilvl|r", AccentHex(), equipped)
+        local suf = ns.WantPrefix(slot) and " ilvl" or ""
+        slot.text:SetFormattedText("|cff%s%.0f%s|r", AccentHex(), equipped, suf)
     end,
     enter = function(slot)
         if not GetAverageItemLevel then return end
@@ -260,7 +261,8 @@ Reg({
             return
         end
         local cur = UnitXP("player") or 0
-        slot.text:SetFormattedText("XP |cff%s%.1f%%|r", AccentHex(), cur / maxXP * 100)
+        local pre = ns.WantPrefix(slot) and "XP " or ""
+        slot.text:SetFormattedText("%s|cff%s%.1f%%|r", pre, AccentHex(), cur / maxXP * 100)
     end,
     enter = function(slot)
         local maxXP = UnitXPMax("player")
@@ -292,7 +294,8 @@ Reg({
     update = function(slot)
         local current = GetUnitSpeed("player") or 0
         local pct = current / BASE_MOVEMENT_SPEED * 100   -- BASE_MOVEMENT_SPEED = 7
-        slot.text:SetFormattedText("Speed |cff%s%.0f%%|r", AccentHex(), pct)
+        local pre = ns.WantPrefix(slot) and "Speed " or ""
+        slot.text:SetFormattedText("%s|cff%s%.0f%%|r", pre, AccentHex(), pct)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)

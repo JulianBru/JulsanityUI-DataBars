@@ -17,8 +17,11 @@ local TAB_TOP   = -52      -- y of the tab row
 local CONTENT_TOP = -88    -- y where the scroll area starts
 
 local function Accent()
+    -- Window chrome (border, tab underline, buttons) inherits EllesmereUI's
+    -- accent. Only the "JulsanityUI" wordmark uses the brand purple (#AD00FF),
+    -- which is set directly on the title FontStrings.
     if EllesmereUI and EllesmereUI.GetAccentColor then return EllesmereUI.GetAccentColor() end
-    return 0.047, 0.824, 0.616
+    return 0.6784, 0.0, 1.0
 end
 local function FontPath()
     return (EllesmereUI and EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("options"))
@@ -116,7 +119,7 @@ function Window:Build()
     local title = f:CreateFontString(nil, "OVERLAY")
     title:SetFont(FontPath(), 18, "")
     title:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -16)
-    title:SetText("|cff0cd29fJulsanityUI|r DataBars")
+    title:SetText("|cffad00ffJulsanityUI|r DataBars")
 
     -- Close button
     local close = CreateFrame("Button", nil, f)
@@ -268,7 +271,7 @@ function Window:RegisterCategory()
 
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOP", panel, "TOP", 0, -40)
-    title:SetText("|cff0cd29fJulsanityUI|r DataBars")
+    title:SetText("|cffad00ffJulsanityUI|r DataBars")
 
     local sub = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     sub:SetPoint("TOP", title, "BOTTOM", 0, -8)

@@ -109,3 +109,18 @@ L["ElvUI-style configurable data texts, native to EllesmereUI."] = "Konfigurierb
 
 -- Config window header
 L["Unlock Mode"]       = "Entsperrmodus"
+
+-- About page
+L["About"]             = "Info"
+L["Copy Support Link"] = "Support-Link kopieren"
+L["JulsanityUI DataBars is an independent, third-party plugin for EllesmereUI."] = "JulsanityUI DataBars ist ein unabhaengiges Drittanbieter-Plugin fuer EllesmereUI."
+L["It is not part of EllesmereUI and is not created, maintained, or endorsed by the EllesmereUI team."] = "Es ist nicht Teil von EllesmereUI und wird nicht vom EllesmereUI-Team erstellt, gepflegt oder unterstuetzt."
+L["Please do not request support for this addon in the EllesmereUI Discord."] = "Bitte fordere fuer dieses Addon keinen Support im EllesmereUI-Discord an."
+L["For bugs or feature requests, use this addon's own GitHub or CurseForge page."] = "Nutze fuer Fehler oder Wuensche die eigene GitHub- oder CurseForge-Seite dieses Addons."
+L["Copy the link (Ctrl+C), then close."] = "Link kopieren (Strg+C), dann schliessen."
+L["Section Separators"] = "Abschnittstrenner"
+L["Separator Uses Accent"] = "Trennlinie nutzt Akzentfarbe"
+L["Separator Color"]   = "Trennlinienfarbe"
+L["Hide Prefixes"]     = "Prefixe ausblenden"
+L["Separators"]        = "Trennlinien"
+L["Changelog"]         = "Changelog"

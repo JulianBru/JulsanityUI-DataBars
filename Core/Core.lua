@@ -24,6 +24,15 @@ function addon:OnEnable()
         ns.Visibility:ApplyOne(bar)
     end)
     if ns.Window and ns.Window.RegisterCategory then ns.Window:RegisterCategory() end  -- Blizzard Options > AddOns
+    if ns.EUI.HookAccent then ns.EUI:HookAccent() end   -- re-render when EllesmereUI applies its accent
+
+    -- Safety net: EllesmereUI often applies the saved accent a moment after
+    -- login; force one re-render shortly after so colours are correct even if
+    -- the accent callback did not fire.
+    C_Timer.After(1, function()
+        if ns.Events and ns.MSG then ns.Events:Fire(ns.MSG.ACCENT_CHANGED) end
+    end)
+
     D.Log("enabled - %d bars, %d datatexts available", #ns.Bars, ns.Registry:Count())
 end
 

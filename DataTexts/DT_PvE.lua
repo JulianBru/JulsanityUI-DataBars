@@ -23,10 +23,11 @@ Reg({
         end
         local score = C_ChallengeMode.GetOverallDungeonScore() or 0
         local color = C_ChallengeMode.GetDungeonScoreRarityColor and C_ChallengeMode.GetDungeonScoreRarityColor(score)
+        local pre = ns.WantPrefix(slot) and "M+ " or ""
         if color then
-            slot.text:SetFormattedText("|cff%sM+ %d|r", U.RGBToHex(color.r, color.g, color.b), score)
+            slot.text:SetFormattedText("|cff%s%s%d|r", U.RGBToHex(color.r, color.g, color.b), pre, score)
         else
-            slot.text:SetFormattedText("|cff%sM+ %d|r", AccentHex(), score)
+            slot.text:SetFormattedText("|cff%s%s%d|r", AccentHex(), pre, score)
         end
     end,
     enter = function(slot)
@@ -107,10 +108,11 @@ Reg({
                 unlocked = unlocked + 1
             end
         end
+        local pre = ns.WantPrefix(slot) and "Vault " or ""
         if C_WeeklyRewards.HasAvailableRewards and C_WeeklyRewards.HasAvailableRewards() then
-            slot.text:SetFormattedText("|cff%sVault Ready|r", AccentHex())
+            slot.text:SetFormattedText("|cff%s%sReady|r", AccentHex(), pre)
         else
-            slot.text:SetFormattedText("Vault |cff%s%d|r|cffaaaaaa/%d|r", AccentHex(), unlocked, #activities)
+            slot.text:SetFormattedText("%s|cff%s%d|r|cffaaaaaa/%d|r", pre, AccentHex(), unlocked, #activities)
         end
     end,
     enter = function(slot)
@@ -236,7 +238,8 @@ Reg({
         elseif GetSpecializationInfoByID then
             name = select(2, GetSpecializationInfoByID(lootID))
         end
-        slot.text:SetFormattedText("|cff%sLoot: %s|r", AccentHex(), name or "?")
+        local pre = ns.WantPrefix(slot) and "Loot: " or ""
+        slot.text:SetFormattedText("|cff%s%s%s|r", AccentHex(), pre, name or "?")
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)

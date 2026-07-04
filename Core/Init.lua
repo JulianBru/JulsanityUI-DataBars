@@ -14,7 +14,7 @@ local ADDON_NAME, ns = ...
 -- Hard guard: without EllesmereUI's Lite layer there is nothing to integrate
 -- with. Bail out early; the .toc dependency normally prevents this.
 if not EllesmereUI or not EllesmereUI.Lite then
-    local msg = "|cff0cd29fJulsanityUI DataBars|r: EllesmereUI not found - addon disabled."
+    local msg = "|cffad00ffJulsanityUI DataBars|r: EllesmereUI not found - addon disabled."
     if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage(msg) end
     return
 end
@@ -76,6 +76,7 @@ ns.MSG = {
     VISIBILITY_CHANGED = "VISIBILITY_CHANGED",   -- fade/auto-hide/lock
     PROFILE_CHANGED    = "PROFILE_CHANGED",      -- active profile switched/reset/imported
     ACCENT_CHANGED     = "ACCENT_CHANGED",       -- EllesmereUI accent color changed
+    VALUES_CHANGED     = "VALUES_CHANGED",       -- re-render datatext values (e.g. hide prefixes)
 }
 
 --------------------------------------------------------------------------------
@@ -89,13 +90,23 @@ ns.addon = EllesmereUI.Lite.NewAddon(ADDON_NAME)
 --  Print helper (accent-coloured prefix)
 --------------------------------------------------------------------------------
 function ns.Print(...)
-    local r, g, b = 0.047, 0.824, 0.616
-    if EllesmereUI.GetAccentColor then r, g, b = EllesmereUI.GetAccentColor() end
-    local prefix = ("|cff%02x%02x%02xJulsanityUI DataBars|r"):format(
-        math.floor(r * 255), math.floor(g * 255), math.floor(b * 255))
+    -- Fixed JulsanityUI brand colour (#AD00FF) for the chat tag - not the
+    -- EllesmereUI accent, so the addon reads as its own plugin.
+    local prefix = "|cffad00ffJulsanityUI DataBars|r"
     local parts = {}
     for i = 1, select("#", ...) do parts[i] = tostring(select(i, ...)) end
     if DEFAULT_CHAT_FRAME then
         DEFAULT_CHAT_FRAME:AddMessage(prefix .. ": " .. table.concat(parts, " "))
     end
+end
+
+--------------------------------------------------------------------------------
+--  DataText prefix visibility
+--------------------------------------------------------------------------------
+-- True unless the slot's bar is configured to hide datatext prefixes/labels
+-- (e.g. "Dur", "ilvl"). DataTexts call this to decide whether to draw a label.
+function ns.WantPrefix(slot)
+    local bar = slot and slot._bar
+    local c = bar and ns.BarCfg and ns.BarCfg(bar.index)
+    return not (c and c.appearance and c.appearance.hidePrefix)
 end

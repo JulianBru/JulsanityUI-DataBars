@@ -25,7 +25,7 @@ function EUI:GetAccent()
         local r, g, b = EllesmereUI.GetAccentColor()
         if r then return r, g, b end
     end
-    return 0.047, 0.824, 0.616
+    return 0.6784, 0.0, 1.0
 end
 
 --------------------------------------------------------------------------------
@@ -94,6 +94,29 @@ function EUI:GetStatusbarList()
         end
     end
     return values, order
+end
+
+--------------------------------------------------------------------------------
+--  Accent change hook (fixes the wrong/teal accent on first login)
+--------------------------------------------------------------------------------
+-- EllesmereUI applies the user's saved accent shortly AFTER login (with a fade),
+-- so datatexts rendered at PLAYER_LOGIN can briefly use EUI's default colour.
+-- Register a callback so we re-render whenever the accent updates. Coalesced via
+-- a short timer so a colour fade triggers only one refresh.
+function EUI:HookAccent()
+    if self._accentHooked then return end
+    if not (EllesmereUI and EllesmereUI.RegAccent) then return end
+    self._accentHooked = true
+    local pending = false
+    EllesmereUI.RegAccent({ type = "callback", fn = function()
+        if pending then return end
+        pending = true
+        C_Timer.After(0.05, function()
+            pending = false
+            if ns.Events and ns.MSG then ns.Events:Fire(ns.MSG.ACCENT_CHANGED) end
+        end)
+    end })
+    D.Log("registered EllesmereUI accent callback")
 end
 
 --------------------------------------------------------------------------------

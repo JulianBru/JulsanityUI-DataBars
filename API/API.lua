@@ -92,8 +92,17 @@ Events:Register(MSG.FONT_CHANGED,       function() API.UpdateFonts() end)
 Events:Register(MSG.SLOTS_CHANGED,      function() API.UpdateSlots() end)
 Events:Register(MSG.VISIBILITY_CHANGED, function() API.UpdateVisibility() end)
 Events:Register(MSG.PROFILE_CHANGED,    function() API.Refresh() end)
+Events:Register(MSG.VALUES_CHANGED,      function()
+    ns.Bar:ForEach(function(bar)
+        local n = ns.BarCfg(bar.index).behavior.numSlots or 1
+        for i = 1, n do
+            local slot = ns.Slot.Get(bar, i)
+            if slot then ns.Engine.Refresh(slot) end
+        end
+    end)
+end)
 Events:Register(MSG.ACCENT_CHANGED,     function()
-    -- Accent affects both styling and the colour datatexts paint inline.
+    -- Accent affects styling, the colour datatexts paint inline, and separators.
     API.UpdateAppearance()
     ns.Bar:ForEach(function(bar)
         local n = ns.BarCfg(bar.index).behavior.numSlots or 1
@@ -101,5 +110,6 @@ Events:Register(MSG.ACCENT_CHANGED,     function()
             local slot = ns.Slot.Get(bar, i)
             if slot then ns.Engine.Refresh(slot) end
         end
+        ns.Bar.Layout(bar)   -- redraw separators with the new accent colour
     end)
 end)
