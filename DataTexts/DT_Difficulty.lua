@@ -11,6 +11,7 @@ local U      = ns.Util
 local Engine = ns.Engine
 local Reg    = ns.RegisterDataText
 local L      = ns.L
+local format = string.format
 
 local function AccentHex() return U.RGBToHex(ns.EUI:GetAccent()) end
 
@@ -64,14 +65,32 @@ end
 Reg({
     name = "Difficulty", label = "Difficulty", category = "PvE",
     events = { "PLAYER_DIFFICULTY_CHANGED", "UPDATE_INSTANCE_INFO", "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE" },
+    options = {
+        { key = "show", type = "dropdown", label = "Show", default = "both",
+          values = { both = "Both", dungeon = "Dungeon", raid = "Raid" }, order = { "both", "dungeon", "raid" } },
+        { key = "names", type = "dropdown", label = "Names", default = "abbr",
+          values = { abbr = "Abbreviated", full = "Full" }, order = { "abbr", "full" } },
+    },
     update = function(slot)
         local hex = ns.ValueHex(slot)
-        if ns.WantPrefix(slot) then
-            slot.text:SetFormattedText("|cffaaaaaaDiff|r |cff%s%s|r|cffaaaaaa/|r|cff%s%s|r",
-                hex, ABBR[CurDungeon()] or "?", hex, ABBR[CurRaid()] or "?")
+        local full = ns.SlotOpt(slot, "names", "abbr") == "full"
+        local function part(id, abbr)
+            local txt = full and DiffName(id) or (abbr or "?")
+            return format("|cff%s%s|r", hex, txt)
+        end
+        local show = ns.SlotOpt(slot, "show", "both")
+        local body
+        if show == "dungeon" then
+            body = part(CurDungeon(), ABBR[CurDungeon()])
+        elseif show == "raid" then
+            body = part(CurRaid(), ABBR[CurRaid()])
         else
-            slot.text:SetFormattedText("|cff%s%s|r|cffaaaaaa/|r|cff%s%s|r",
-                hex, ABBR[CurDungeon()] or "?", hex, ABBR[CurRaid()] or "?")
+            body = part(CurDungeon(), ABBR[CurDungeon()]) .. "|cffaaaaaa/|r" .. part(CurRaid(), ABBR[CurRaid()])
+        end
+        if ns.WantPrefix(slot) then
+            slot.text:SetText("|cffaaaaaaDiff|r " .. body)
+        else
+            slot.text:SetText(body)
         end
     end,
     enter = function(slot)

@@ -3,6 +3,35 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.7] — 2026-07-07
+
+Per-datatext customization and more languages.
+
+### Added
+- **Customizable datatexts.** Most datatexts now have their own options, shown in
+  the Behavior tab beneath the datatext and saved per slot (so two clocks can
+  differ). Highlights:
+  - Time: local vs. server time, 12/24-hour.
+  - Coordinates: show zone, decimals.
+  - System: FPS / MS / both, home vs. world latency.
+  - Durability: lowest slot vs. average.
+  - Gold: short numbers (485K), gold only, gold gained this session.
+  - Bag Space: free vs. used, count the reagent bag.
+  - Item Level: equipped vs. overall, decimals.
+  - Experience: percent / current / remaining, show rested.
+  - Reputation: percent / standing / value.
+  - Movement Speed: decimals.
+  - Friends: WoW / Battle.net / both.
+  - Guild: online vs. online / total.
+  - Difficulty: dungeon / raid / both, abbreviated vs. full names.
+  - Great Vault: "Ready" vs. count.
+  - Mythic+ Keystone: abbreviate the dungeon name.
+- **Four new languages:** French, Spanish (also esMX), Italian and Portuguese (BR).
+
+### Fixed
+- The options window no longer jumps back to the top when you change a datatext;
+  the scroll position is preserved.
+
 ## [1.6.1] — 2026-07-07
 
 Polish and fixes for layout and text colouring.

@@ -210,18 +210,28 @@ end
 --------------------------------------------------------------------------------
 --  Content
 --------------------------------------------------------------------------------
-function Window:BuildContent()
+function Window:BuildContent(keepScroll)
     if not self.child then return end
+    -- Remember the scroll offset for in-place rebuilds (e.g. after changing a
+    -- datatext), so the page doesn't jump back to the top.
+    local saved = keepScroll and (self.scroll:GetVerticalScroll() or 0) or 0
     ClearChildren(self.child)
     if EllesmereUI and EllesmereUI.ResetRowCounters then EllesmereUI.ResetRowCounters() end
     self.child:SetWidth(self.scroll:GetWidth())
     local totalH = ns.Config.BuildPage(self.activeTab, self.child, -6)
     self.child:SetHeight(totalH)
-    self.scroll:SetVerticalScroll(0)
+
+    local function apply()
+        local maxs = self.scroll:GetVerticalScrollRange() or 0
+        self.scroll:SetVerticalScroll(math.min(saved, maxs))
+    end
+    apply()
+    -- The scroll range can lag one frame after the child resizes; re-clamp then.
+    if keepScroll then C_Timer.After(0, apply) end
 end
 
 function Window:RebuildCurrent()
-    if self.frame and self.frame:IsShown() then self:BuildContent() end
+    if self.frame and self.frame:IsShown() then self:BuildContent(true) end
 end
 
 function Window:IsShown()

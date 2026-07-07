@@ -66,6 +66,7 @@ local function BaseBar()
             slots        = { "Friends", "Difficulty", "Loot Spec", "Gold", "Durability" },
             lockPosition = false,
             snap         = true,
+            slotOptions  = {},       -- per-slot datatext options (by slot index)
         },
         position = { point = "CENTER", relPoint = "CENTER", x = 0, y = -200 },
     }

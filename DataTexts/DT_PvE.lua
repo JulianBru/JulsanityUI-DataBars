@@ -58,9 +58,28 @@ Reg({
 --------------------------------------------------------------------------------
 --  Mythic+ Keystone  -  owned keystone level + dungeon
 --------------------------------------------------------------------------------
+-- Initials-based abbreviation: "Den of Nalorakk" -> "DoN". Connector words
+-- (of/the/and) stay lowercase; other words contribute an uppercase initial.
+local ABBR_SKIP = { ["of"] = true, ["the"] = true, ["and"] = true }
+local function AbbrevDungeon(name)
+    if not name or name == "" then return "?" end
+    local out = {}
+    for word in name:gmatch("[^%s%-]+") do
+        if ABBR_SKIP[word:lower()] then
+            out[#out + 1] = word:sub(1, 1):lower()
+        else
+            out[#out + 1] = word:sub(1, 1):upper()
+        end
+    end
+    local abbr = table.concat(out)
+    return (abbr ~= "" and abbr) or name
+end
 Reg({
     name = "Mythic+ Keystone", label = "Mythic+ Keystone", category = "PvE",
     events = { "BAG_UPDATE", "PLAYER_ENTERING_WORLD", "CHALLENGE_MODE_COMPLETED" },
+    options = {
+        { key = "abbreviate", type = "toggle", label = "Abbreviate Dungeon", default = true },
+    },
     update = function(slot)
         if not (C_MythicPlus and C_MythicPlus.GetOwnedKeystoneLevel) then
             slot.text:SetText("|cffaaaaaaNo Key|r"); return
@@ -71,7 +90,7 @@ Reg({
             slot.text:SetText("|cffaaaaaaNo Key|r"); return
         end
         local name = C_ChallengeMode.GetMapUIInfo and (C_ChallengeMode.GetMapUIInfo(mapID)) or "Key"
-        if #name > 10 then name = name:sub(1, 9) .. "." end
+        if ns.SlotOpt(slot, "abbreviate", true) then name = AbbrevDungeon(name) end
         slot.text:SetFormattedText("|cff%s+%d|r %s", ns.ValueHex(slot), level, name)
     end,
     enter = function(slot)
@@ -97,6 +116,10 @@ Reg({
 Reg({
     name = "Great Vault", label = "Great Vault", category = "PvE",
     events = { "WEEKLY_REWARDS_UPDATE", "PLAYER_ENTERING_WORLD", "CHALLENGE_MODE_COMPLETED" },
+    options = {
+        { key = "display", type = "dropdown", label = "Display", default = "auto",
+          values = { auto = "Auto", count = "Count" }, order = { "auto", "count" } },
+    },
     update = function(slot)
         if not (C_WeeklyRewards and C_WeeklyRewards.GetActivities) then
             slot.text:SetText("|cffaaaaaaVault --|r"); return
@@ -109,7 +132,8 @@ Reg({
             end
         end
         local pre = ns.WantPrefix(slot) and "Vault " or ""
-        if C_WeeklyRewards.HasAvailableRewards and C_WeeklyRewards.HasAvailableRewards() then
+        local ready = C_WeeklyRewards.HasAvailableRewards and C_WeeklyRewards.HasAvailableRewards()
+        if ready and ns.SlotOpt(slot, "display", "auto") == "auto" then
             slot.text:SetFormattedText("|cff%s%sReady|r", ns.ValueHex(slot), pre)
         else
             slot.text:SetFormattedText("%s|cff%s%d|r|cffaaaaaa/%d|r", pre, ns.ValueHex(slot), unlocked, #activities)

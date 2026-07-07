@@ -17,6 +17,16 @@ local function AccentHex() return U.RGBToHex(ns.EUI:GetAccent()) end
 
 -- Format a copper amount as a coin string (uses Blizzard's icon string when
 -- available, otherwise a plain "Ng Ms" fallback).
+local goldSessionStart   -- copper at first update this session
+
+-- Compact gold amount: 485303 -> "485K", 1500000 -> "1.5M".
+local function GoldShort(g)
+    if g >= 1e9 then return format("%.1fB", g / 1e9) end
+    if g >= 1e6 then return format("%.1fM", g / 1e6) end
+    if g >= 1e3 then return format("%.0fK", g / 1e3) end
+    return tostring(g)
+end
+
 local function Money(copper)
     copper = copper or 0
     if GetMoneyString then
@@ -105,12 +115,31 @@ end
 Reg({
     name = "Gold", label = "Gold", category = "Character",
     events = { "PLAYER_MONEY", "PLAYER_ENTERING_WORLD", "SEND_MAIL_MONEY_CHANGED", "TRADE_MONEY_CHANGED" },
+    options = {
+        { key = "shortNumber", type = "toggle", label = "Short Numbers", default = false },
+        { key = "goldOnly",    type = "toggle", label = "Gold Only",     default = false },
+        { key = "sessionGold", type = "toggle", label = "Session Gold",  default = false },
+    },
     update = function(slot)
         local copper = GetMoney() or 0
+        if goldSessionStart == nil then goldSessionStart = copper end
+        local function goldStr(gv) return ns.SlotOpt(slot, "shortNumber", false) and GoldShort(gv) or BreakUpLargeNumbers(gv) end
+
+        if ns.SlotOpt(slot, "sessionGold", false) then
+            local delta = copper - goldSessionStart
+            local g = floor(math.abs(delta) / 10000)
+            local sign = delta < 0 and "-" or "+"
+            local col  = delta < 0 and "ff4719" or "1eff00"
+            slot.text:SetFormattedText("|cff%s%s%s|r|cffc0c0c0g|r", col, sign, goldStr(g))
+            return
+        end
+
         local g = floor(copper / 10000)
         local s = floor((copper % 10000) / 100)
-        if g > 0 then
-            slot.text:SetFormattedText("|cffffd700%s|r|cffc0c0c0g %ds|r", BreakUpLargeNumbers(g), s)
+        if ns.SlotOpt(slot, "goldOnly", false) then
+            slot.text:SetFormattedText("|cffffd700%s|r|cffc0c0c0g|r", goldStr(g))
+        elseif g > 0 then
+            slot.text:SetFormattedText("|cffffd700%s|r|cffc0c0c0g %ds|r", goldStr(g), s)
         elseif s > 0 then
             slot.text:SetFormattedText("|cffc0c0c0%ds %dc|r", s, copper % 100)
         else
@@ -215,12 +244,23 @@ local ILVL_NAMES = {
 Reg({
     name = "Item Level", label = "Item Level", category = "Character",
     events = { "PLAYER_EQUIPMENT_CHANGED", "PLAYER_ENTERING_WORLD", "PLAYER_LEVEL_UP" },
+    options = {
+        { key = "source", type = "dropdown", label = "Source", default = "equipped",
+          values = { equipped = "Equipped", overall = "Overall" }, order = { "equipped", "overall" } },
+        { key = "decimals", type = "dropdown", label = "Decimals", default = "0",
+          values = { ["0"] = "0", ["1"] = "1" }, order = { "0", "1" } },
+    },
     update = function(slot)
         if not GetAverageItemLevel then slot.text:SetText("N/A"); return end
-        local _, equipped = GetAverageItemLevel()
-        if not equipped then slot.text:SetText("N/A"); return end
+        local overall, equipped = GetAverageItemLevel()
+        local ilvl = (ns.SlotOpt(slot, "source", "equipped") == "overall") and overall or equipped
+        if not ilvl then slot.text:SetText("N/A"); return end
         local suf = ns.WantPrefix(slot) and " ilvl" or ""
-        slot.text:SetFormattedText("|cff%s%.0f%s|r", ns.ValueHex(slot), equipped, suf)
+        if (tonumber(ns.SlotOpt(slot, "decimals", "0")) or 0) >= 1 then
+            slot.text:SetFormattedText("|cff%s%.1f%s|r", ns.ValueHex(slot), ilvl, suf)
+        else
+            slot.text:SetFormattedText("|cff%s%.0f%s|r", ns.ValueHex(slot), ilvl, suf)
+        end
     end,
     enter = function(slot)
         if not GetAverageItemLevel then return end
@@ -254,6 +294,11 @@ Reg({
 Reg({
     name = "Experience", label = "Experience", category = "Character",
     events = { "PLAYER_XP_UPDATE", "PLAYER_ENTERING_WORLD", "PLAYER_LEVEL_UP", "DISABLE_XP_GAIN", "ENABLE_XP_GAIN" },
+    options = {
+        { key = "format", type = "dropdown", label = "Format", default = "percent",
+          values = { percent = "Percent", current = "Current", remaining = "Remaining" }, order = { "percent", "current", "remaining" } },
+        { key = "showRested", type = "toggle", label = "Show Rested", default = false },
+    },
     update = function(slot)
         local maxXP = UnitXPMax("player")
         if not maxXP or maxXP == 0 or IsXPUserDisabled() then
@@ -262,7 +307,22 @@ Reg({
         end
         local cur = UnitXP("player") or 0
         local pre = ns.WantPrefix(slot) and "XP " or ""
-        slot.text:SetFormattedText("%s|cff%s%.1f%%|r", pre, ns.ValueHex(slot), cur / maxXP * 100)
+        local hex = ns.ValueHex(slot)
+        local fmt = ns.SlotOpt(slot, "format", "percent")
+        local body
+        if fmt == "current" then
+            body = format("%s / %s", U.ShortValue(cur), U.ShortValue(maxXP))
+        elseif fmt == "remaining" then
+            body = U.ShortValue(maxXP - cur)
+        else
+            body = format("%.1f%%", cur / maxXP * 100)
+        end
+        local rested = ""
+        if ns.SlotOpt(slot, "showRested", false) then
+            local rx = GetXPExhaustion() or 0
+            if rx > 0 then rested = format(" |cff3399ff+%.0f%%|r", rx / maxXP * 100) end
+        end
+        slot.text:SetFormattedText("%s|cff%s%s|r%s", pre, hex, body, rested)
     end,
     enter = function(slot)
         local maxXP = UnitXPMax("player")
@@ -291,11 +351,19 @@ Reg({
 --------------------------------------------------------------------------------
 Reg({
     name = "Speed", label = "Movement Speed", category = "Character", interval = 0.5,
+    options = {
+        { key = "decimals", type = "dropdown", label = "Decimals", default = "0",
+          values = { ["0"] = "0", ["1"] = "1" }, order = { "0", "1" } },
+    },
     update = function(slot)
         local current = GetUnitSpeed("player") or 0
         local pct = current / BASE_MOVEMENT_SPEED * 100   -- BASE_MOVEMENT_SPEED = 7
         local pre = ns.WantPrefix(slot) and "Speed " or ""
-        slot.text:SetFormattedText("%s|cff%s%.0f%%|r", pre, ns.ValueHex(slot), pct)
+        if (tonumber(ns.SlotOpt(slot, "decimals", "0")) or 0) >= 1 then
+            slot.text:SetFormattedText("%s|cff%s%.1f%%|r", pre, ns.ValueHex(slot), pct)
+        else
+            slot.text:SetFormattedText("%s|cff%s%.0f%%|r", pre, ns.ValueHex(slot), pct)
+        end
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -316,7 +384,7 @@ Reg({
 --------------------------------------------------------------------------------
 --  Bags  -  free / total slots; tooltip: per-bag; click: open bags
 --------------------------------------------------------------------------------
-local function CountBags()
+local function CountBags(includeReagent)
     local free, total = 0, 0
     for i = 0, NUM_TOTAL_EQUIPPED_BAG_SLOTS or 4 do
         local f, ftype = C_Container.GetContainerNumFreeSlots(i)
@@ -325,15 +393,26 @@ local function CountBags()
             free  = free + (f or 0)
         end
     end
+    if includeReagent then
+        local ri = (Enum and Enum.BagIndex and Enum.BagIndex.ReagentBag) or 5
+        total = total + (C_Container.GetContainerNumSlots(ri) or 0)
+        free  = free + (C_Container.GetContainerNumFreeSlots(ri) or 0)
+    end
     return free, total
 end
 
 Reg({
     name = "Bags", label = "Bag Space", category = "Character",
     events = { "BAG_UPDATE", "PLAYER_ENTERING_WORLD", "BAG_UPDATE_DELAYED" },
+    options = {
+        { key = "mode", type = "dropdown", label = "Display", default = "free",
+          values = { free = "Free", used = "Used" }, order = { "free", "used" } },
+        { key = "reagent", type = "toggle", label = "Count Reagent Bag", default = false },
+    },
     update = function(slot)
-        local free, total = CountBags()
-        slot.text:SetFormattedText("|cff%s%d|r |cffaaaaaa/ %d|r", ns.ValueHex(slot), free, total)
+        local free, total = CountBags(ns.SlotOpt(slot, "reagent", false))
+        local shown = (ns.SlotOpt(slot, "mode", "free") == "used") and (total - free) or free
+        slot.text:SetFormattedText("|cff%s%d|r |cffaaaaaa/ %d|r", ns.ValueHex(slot), shown, total)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -372,6 +451,10 @@ end
 Reg({
     name = "Reputation", label = "Reputation", category = "Character",
     events = { "UPDATE_FACTION", "PLAYER_ENTERING_WORLD" },
+    options = {
+        { key = "format", type = "dropdown", label = "Format", default = "percent",
+          values = { percent = "Percent", standing = "Standing", value = "Value" }, order = { "percent", "standing", "value" } },
+    },
     update = function(slot)
         local d = WatchedFaction()
         if not d or not d.name or d.name == "" then
@@ -388,7 +471,16 @@ Reg({
         if d.reaction and d.reaction >= 5 then
             hex = ns.ColorOr(slot, hex)
         end
-        slot.text:SetFormattedText("|cff%s%.0f%%|r", hex, pct)
+        local fmt = ns.SlotOpt(slot, "format", "percent")
+        local body
+        if fmt == "standing" then
+            body = _G["FACTION_STANDING_LABEL" .. (d.reaction or 4)] or "?"
+        elseif fmt == "value" then
+            body = span > 0 and format("%s / %s", U.ShortValue(cur - lo), U.ShortValue(span)) or "Max"
+        else
+            body = format("%.0f%%", pct)
+        end
+        slot.text:SetFormattedText("|cff%s%s|r", hex, body)
     end,
     enter = function(slot)
         local d = WatchedFaction()

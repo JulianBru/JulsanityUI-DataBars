@@ -33,9 +33,25 @@ end
 --------------------------------------------------------------------------------
 Reg({
     name = "Time", label = "Time", category = "System", interval = 2,
+    options = {
+        { key = "localTime", type = "toggle", label = "Local Time",     default = false },
+        { key = "format24",  type = "toggle", label = "24-Hour Format", default = true  },
+    },
     update = function(slot)
-        local h, m = GetGameTime()
-        slot.text:SetFormattedText("|cff%s%d:%02d|r", ns.ValueHex(slot), h, m)
+        local h, m
+        if ns.SlotOpt(slot, "localTime", false) then
+            local lt = date("*t"); h, m = lt.hour, lt.min
+        else
+            h, m = GetGameTime()
+        end
+        local hex = ns.ValueHex(slot)
+        if ns.SlotOpt(slot, "format24", true) then
+            slot.text:SetFormattedText("|cff%s%d:%02d|r", hex, h, m)
+        else
+            local ampm = (h >= 12) and "PM" or "AM"
+            local hh = h % 12; if hh == 0 then hh = 12 end
+            slot.text:SetFormattedText("|cff%s%d:%02d %s|r", hex, hh, m, ampm)
+        end
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -64,17 +80,31 @@ Reg({
 --------------------------------------------------------------------------------
 Reg({
     name = "Coordinates", label = "Coordinates", category = "System", interval = 0.3,
+    options = {
+        { key = "showZone", type = "toggle", label = "Show Zone", default = true },
+        { key = "decimals", type = "dropdown", label = "Decimals", default = "1",
+          values = { ["0"] = "0", ["1"] = "1", ["2"] = "2" }, order = { "0", "1", "2" } },
+    },
     update = function(slot)
         local mapID = C_Map.GetBestMapForUnit("player")
         if not mapID then slot.text:SetText("|cffaaaaaa--|r"); return end
         local pos = C_Map.GetPlayerMapPosition(mapID, "player")
-        local zone = (GetMinimapZoneText and GetMinimapZoneText()) or GetZoneText() or "?"
-        if #zone > 14 then zone = zone:sub(1, 13) .. "." end
+        local dec = tonumber(ns.SlotOpt(slot, "decimals", "1")) or 1
+        local zone = ""
+        if ns.SlotOpt(slot, "showZone", true) then
+            zone = (GetMinimapZoneText and GetMinimapZoneText()) or GetZoneText() or "?"
+            if #zone > 14 then zone = zone:sub(1, 13) .. "." end
+        end
         if pos then
             local x, y = pos:GetXY()
-            slot.text:SetFormattedText("%s |cffaaaaaa%.1f, %.1f|r", zone, x * 100, y * 100)
+            local coords = format("%%.%df, %%.%df", dec, dec):format(x * 100, y * 100)
+            if zone ~= "" then
+                slot.text:SetFormattedText("%s |cffaaaaaa%s|r", zone, coords)
+            else
+                slot.text:SetFormattedText("|cffaaaaaa%s|r", coords)
+            end
         else
-            slot.text:SetText(zone)
+            slot.text:SetText(zone ~= "" and zone or "|cffaaaaaa--|r")
         end
     end,
     click = function()
@@ -87,13 +117,26 @@ Reg({
 --------------------------------------------------------------------------------
 Reg({
     name = "System", label = "System (FPS/MS)", category = "System", interval = 1.5,
+    options = {
+        { key = "display", type = "dropdown", label = "Display", default = "both",
+          values = { both = "FPS + MS", fps = "FPS", ms = "MS" }, order = { "both", "fps", "ms" } },
+        { key = "latency", type = "dropdown", label = "Latency", default = "world",
+          values = { world = "World", home = "Home" }, order = { "world", "home" } },
+    },
     update = function(slot)
         local fps = floor(GetFramerate())
         local _, _, lh, lw = GetNetStats()
-        local lat = max(lh or 0, lw or 0)
-        slot.text:SetFormattedText("|cff%s%d fps|r  |cff%s%d ms|r",
-            StatusHex(slot, fps, 50, 25, false), fps,
-            StatusHex(slot, lat, 100, 250, true), lat)
+        local lat = (ns.SlotOpt(slot, "latency", "world") == "home") and (lh or 0) or (lw or 0)
+        local disp = ns.SlotOpt(slot, "display", "both")
+        local fpsStr = format("|cff%s%d fps|r", StatusHex(slot, fps, 50, 25, false), fps)
+        local msStr  = format("|cff%s%d ms|r",  StatusHex(slot, lat, 100, 250, true), lat)
+        if disp == "fps" then
+            slot.text:SetText(fpsStr)
+        elseif disp == "ms" then
+            slot.text:SetText(msStr)
+        else
+            slot.text:SetText(fpsStr .. "  " .. msStr)
+        end
     end,
     enter = function(slot)
         local _, bwIn, latHome, latWorld = GetNetStats()
@@ -123,14 +166,23 @@ local DURA_SLOTS = {
 Reg({
     name = "Durability", label = "Durability", category = "System",
     events = { "UPDATE_INVENTORY_DURABILITY", "PLAYER_ENTERING_WORLD", "MERCHANT_SHOW", "MERCHANT_CLOSED" },
+    options = {
+        { key = "mode", type = "dropdown", label = "Value", default = "lowest",
+          values = { lowest = "Lowest", average = "Average" }, order = { "lowest", "average" } },
+    },
     update = function(slot)
-        local lowest = 101
+        local lowest, sum, count = 101, 0, 0
         for s in pairs(DURA_SLOTS) do
             local c, m = GetInventoryItemDurability(s)
             if c and m and m > 0 then
                 local pct = floor(c / m * 100)
                 if pct < lowest then lowest = pct end
+                sum = sum + pct; count = count + 1
             end
+        end
+        local value = lowest
+        if ns.SlotOpt(slot, "mode", "lowest") == "average" and count > 0 then
+            value = floor(sum / count)
         end
         if lowest > 100 then
             slot.text:SetText("|cff4d4d4dDur --|r")
@@ -148,7 +200,7 @@ Reg({
         end
         slot._duraTries = 0
         local pre = ns.WantPrefix(slot) and "Dur " or ""
-        slot.text:SetFormattedText("|cff%s%s%d%%|r", StatusHex(slot, lowest, 60, 30, false), pre, lowest)
+        slot.text:SetFormattedText("|cff%s%s%d%%|r", StatusHex(slot, value, 60, 30, false), pre, value)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)

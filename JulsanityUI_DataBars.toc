@@ -2,7 +2,7 @@
 ## Title: |cffad00ffJulsanityUI|r DataBars
 ## Notes: ElvUI-style configurable data texts, native to EllesmereUI's look & feel
 ## Author: Julsanity (CheersItsJulian)
-## Version: 1.6.1
+## Version: 1.7
 ## X-Curse-Project-ID: 1594567
 ## Dependencies: EllesmereUI
 ## OptionalDeps: Syndicator
@@ -12,6 +12,10 @@
 Core\Init.lua
 Locales\enUS.lua
 Locales\deDE.lua
+Locales\esES.lua
+Locales\frFR.lua
+Locales\itIT.lua
+Locales\ptBR.lua
 Utils\Utils.lua
 Utils\Debug.lua
 API\Events.lua

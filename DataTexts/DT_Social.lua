@@ -6,6 +6,7 @@ local _, ns = ...
 local U      = ns.Util
 local Engine = ns.Engine
 local Reg    = ns.RegisterDataText
+local format = string.format
 
 local function AccentHex() return U.RGBToHex(ns.EUI:GetAccent()) end
 
@@ -26,12 +27,18 @@ Reg({
         "FRIENDLIST_UPDATE", "PLAYER_ENTERING_WORLD",
         "BN_FRIEND_LIST_SIZE_CHANGED", "BN_FRIEND_ACCOUNT_ONLINE", "BN_FRIEND_ACCOUNT_OFFLINE",
     },
+    options = {
+        { key = "source", type = "dropdown", label = "Source", default = "both",
+          values = { both = "Both", wow = "WoW", bnet = "Battle.net" }, order = { "both", "wow", "bnet" } },
+    },
     update = function(slot)
         local wowOnline, _, bnOnline = FriendCounts()
+        local src = ns.SlotOpt(slot, "source", "both")
+        local n = (src == "wow") and wowOnline or (src == "bnet") and bnOnline or (wowOnline + bnOnline)
         if ns.WantPrefix(slot) then
-            slot.text:SetFormattedText("|cffaaaaaaFriends:|r |cff%s%d|r", ns.ValueHex(slot), wowOnline + bnOnline)
+            slot.text:SetFormattedText("|cffaaaaaaFriends:|r |cff%s%d|r", ns.ValueHex(slot), n)
         else
-            slot.text:SetFormattedText("|cff%s%d|r", ns.ValueHex(slot), wowOnline + bnOnline)
+            slot.text:SetFormattedText("|cff%s%d|r", ns.ValueHex(slot), n)
         end
     end,
     enter = function(slot)
@@ -56,17 +63,29 @@ Reg({
 Reg({
     name = "Guild", label = "Guild", category = "Social",
     events = { "GUILD_ROSTER_UPDATE", "PLAYER_GUILD_UPDATE", "PLAYER_ENTERING_WORLD" },
+    options = {
+        { key = "display", type = "dropdown", label = "Display", default = "online",
+          values = { online = "Online", onlinetotal = "Online / Total" }, order = { "online", "onlinetotal" } },
+    },
     update = function(slot)
         if not IsInGuild() then
             slot.text:SetText("|cffaaaaaaNo Guild|r")
             return
         end
         if C_GuildInfo and C_GuildInfo.GuildRoster then C_GuildInfo.GuildRoster() end
-        local _, online = GetNumGuildMembers()
-        if ns.WantPrefix(slot) then
-            slot.text:SetFormattedText("|cffaaaaaaGuild:|r |cff%s%d|r", ns.ValueHex(slot), online or 0)
+        local total, online = GetNumGuildMembers()
+        online = online or 0
+        local hex = ns.ValueHex(slot)
+        local value
+        if ns.SlotOpt(slot, "display", "online") == "onlinetotal" then
+            value = format("|cff%s%d|r |cffaaaaaa/ %d|r", hex, online, total or 0)
         else
-            slot.text:SetFormattedText("|cff%s%d|r", ns.ValueHex(slot), online or 0)
+            value = format("|cff%s%d|r", hex, online)
+        end
+        if ns.WantPrefix(slot) then
+            slot.text:SetText("|cffaaaaaaGuild:|r " .. value)
+        else
+            slot.text:SetText(value)
         end
     end,
     enter = function(slot)

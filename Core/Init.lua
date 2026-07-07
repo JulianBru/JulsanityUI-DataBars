@@ -114,6 +114,18 @@ end
 -- Hex colour a datatext should use for its main VALUE: the bar's custom text
 -- colour when enabled, otherwise the EllesmereUI accent. Semantic colours
 -- (gold, durability, reputation, ...) are set explicitly and ignore this.
+-- Per-slot datatext option value: reads the bar's behavior.slotOptions[slotIndex]
+-- for `key`, falling back to `default`. Lets each slot customise its datatext
+-- (e.g. a clock showing local vs. server time).
+function ns.SlotOpt(slot, key, default)
+    local bar = slot and slot._bar
+    local c = bar and ns.BarCfg and ns.BarCfg(bar.index)
+    local so = c and c.behavior and c.behavior.slotOptions and c.behavior.slotOptions[slot.index]
+    local v = so and so[key]
+    if v == nil then return default end
+    return v
+end
+
 function ns.ValueHex(slot)
     local bar = slot and slot._bar
     local c = bar and ns.BarCfg and ns.BarCfg(bar.index)

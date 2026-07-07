@@ -209,6 +209,34 @@ local function BuildAppearance(parent, y)
     return y
 end
 
+-- Render one per-slot datatext option (toggle/dropdown/slider); returns height.
+local function RenderSlotOption(c, idx, opt, parent, y)
+    local W = EllesmereUI.Widgets
+    local label = "   " .. (L[opt.label] or opt.label)
+    local function getv()
+        local so = c.behavior.slotOptions[idx]
+        local v = so and so[opt.key]
+        if v == nil then return opt.default end
+        return v
+    end
+    local function setv(v)
+        c.behavior.slotOptions[idx] = c.behavior.slotOptions[idx] or {}
+        c.behavior.slotOptions[idx][opt.key] = v
+        ns.Events:Fire(MSG.VALUES_CHANGED)
+    end
+    local _, hh = nil, 0
+    if opt.type == "toggle" then
+        _, hh = W:Toggle(parent, label, y, getv, setv)
+    elseif opt.type == "dropdown" then
+        local vals = {}
+        for k, disp in pairs(opt.values) do vals[k] = L[disp] or disp end
+        _, hh = W:Dropdown(parent, label, y, vals, getv, setv, opt.order)
+    elseif opt.type == "slider" then
+        _, hh = W:Slider(parent, label, y, opt.min or 0, opt.max or 100, opt.step or 1, getv, setv)
+    end
+    return hh or 0
+end
+
 local function BuildBehavior(parent, y)
     y = BuildBarSelector(parent, y)
     local c, W = cfg(), EllesmereUI.Widgets
@@ -226,12 +254,21 @@ local function BuildBehavior(parent, y)
 
     local values, order = ns.Registry:GetDropdownData()
     local n = min(c.behavior.numSlots or 1, UI_SLOT_CAP)
+    c.behavior.slotOptions = c.behavior.slotOptions or {}
     for i = 1, n do
         local idx = i
         _, h = W:Dropdown(parent, L["DataText"] .. " " .. idx, y, values,
             function() return c.behavior.slots[idx] or "None" end,
-            function(v) c.behavior.slots[idx] = v; ns.Events:Fire(MSG.SLOTS_CHANGED) end,
+            function(v) c.behavior.slots[idx] = v; ns.Events:Fire(MSG.SLOTS_CHANGED); ScheduleRebuild() end,
             order); y = y - h
+
+        -- Per-datatext options for the selected datatext, shown under its dropdown.
+        local spec = ns.DataTexts[c.behavior.slots[idx]]
+        if spec and spec.options then
+            for _, opt in ipairs(spec.options) do
+                y = y - RenderSlotOption(c, idx, opt, parent, y)
+            end
+        end
     end
 
     _, h = W:Toggle(parent, L["Lock Position"], y,
@@ -298,6 +335,12 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.7|r",
+    "- Datatexts are now customizable: each has its own options under Behavior,",
+    "  saved per slot (e.g. local vs. server clock, gold as 485K, FPS/MS only).",
+    "- Added French, Spanish, Italian and Portuguese (BR) translations.",
+    "- The options window keeps its scroll position when changing a datatext.",
+    "",
     "|cffad00ffVersion 1.6.1|r",
     "- Text Color now recolours the datatext values, incl. the good state of FPS,",
     "  durability and reputation (warning colours are kept).",
