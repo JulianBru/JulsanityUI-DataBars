@@ -76,9 +76,44 @@ local function DoUpdate(slot, event, ...)
     if ns.Bar and ns.Bar.OnSlotUpdated then ns.Bar.OnSlotUpdated(slot) end
 end
 
+--------------------------------------------------------------------------------
+--  Live tooltip refresh (opt-in via spec.tooltipRefresh = interval seconds)
+--
+--  While the cursor stays on a slot whose spec sets `tooltipRefresh`, the spec's
+--  `enter` is re-run on an interval so the tooltip shows live values (e.g. addon
+--  memory). Paused while in combat, and stopped when the cursor leaves.
+--------------------------------------------------------------------------------
+local ttDriver = CreateFrame("Frame")
+ttDriver:Hide()
+local ttSlot, ttInterval, ttAcc = nil, 1, 0
+ttDriver:SetScript("OnUpdate", function(_, elapsed)
+    ttAcc = ttAcc + elapsed
+    if ttAcc < ttInterval then return end
+    ttAcc = 0
+    local sl = ttSlot
+    if not (sl and sl._spec and type(sl._spec.enter) == "function" and sl:IsMouseOver()) then
+        ttDriver:Hide(); ttSlot = nil; return
+    end
+    if InCombatLockdown() then return end   -- pause live refresh in combat
+    SafeCall(sl._spec.enter, sl)
+end)
+
+local function StartTooltipRefresh(slot, spec)
+    local iv = spec.tooltipRefresh
+    if not iv then return end
+    ttSlot = slot
+    ttInterval = (type(iv) == "number" and iv > 0) and iv or 1
+    ttAcc = 0
+    ttDriver:Show()
+end
+local function StopTooltipRefresh(slot)
+    if ttSlot == slot then ttDriver:Hide(); ttSlot = nil end
+end
+
 --- Detach any spec currently bound to the slot: stop events, cancel the ticker,
 --- clear scripts and text. Leaves the slot reusable (pooled).
 function Engine.Unbind(slot)
+    StopTooltipRefresh(slot)
     if slot._eventFrame then
         slot._eventFrame:UnregisterAllEvents()
         slot._eventFrame:SetScript("OnEvent", nil)
@@ -156,9 +191,13 @@ function Engine.Bind(slot, dtName)
     slot:SetScript("OnEnter", function()
         local r, g, b = ns.EUI:GetAccent()
         slot.text:SetTextColor(r, g, b, 1)
-        if hasEnter then SafeCall(spec.enter, slot) end
+        if hasEnter then
+            SafeCall(spec.enter, slot)
+            StartTooltipRefresh(slot, spec)
+        end
     end)
     slot:SetScript("OnLeave", function()
+        StopTooltipRefresh(slot)
         local c = slot._baseColor
         if c then slot.text:SetTextColor(c[1], c[2], c[3], c[4] or 1) end
         if type(spec.leave) == "function" then

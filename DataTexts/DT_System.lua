@@ -121,6 +121,7 @@ local function FormatMem(kb)
 end
 Reg({
     name = "System", label = "System (FPS/MS)", category = "System", interval = 1.5,
+    tooltipRefresh = 1,
     options = {
         { key = "display", type = "dropdown", label = "Display", default = "both",
           values = { both = "FPS + MS", fps = "FPS", ms = "MS" }, order = { "both", "fps", "ms" } },
@@ -206,6 +207,7 @@ end
 Reg({
     name = "Addons", label = "Addons", category = "System",
     events = { "PLAYER_ENTERING_WORLD", "ADDON_LOADED" },
+    tooltipRefresh = 1,
     update = function(slot)
         local loaded = 0
         for i = 1, NumAddons() do

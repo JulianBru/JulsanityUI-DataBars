@@ -3,6 +3,13 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.7-alpha3] — 2026-07-07
+
+### Added
+- Live tooltip refresh: the **System (FPS/MS)** and **Addons** tooltips now
+  update once per second while open, so memory and latency values stay current.
+  Paused while in combat.
+
 ## [1.7-alpha2] — 2026-07-07
 
 ### Added

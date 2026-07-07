@@ -335,6 +335,9 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.7-alpha3|r",
+    "- System and Addons tooltips now refresh live every second (paused in combat).",
+    "",
     "|cffad00ffVersion 1.7-alpha2|r",
     "- New 'Addons' datatext: count of loaded addons + full memory tooltip.",
     "- System (FPS/MS) tooltip now shows addon memory (off / 3 / 5 / 10 / all).",
