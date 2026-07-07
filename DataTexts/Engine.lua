@@ -83,31 +83,33 @@ end
 --  `enter` is re-run on an interval so the tooltip shows live values (e.g. addon
 --  memory). Paused while in combat, and stopped when the cursor leaves.
 --------------------------------------------------------------------------------
-local ttDriver = CreateFrame("Frame")
-ttDriver:Hide()
-local ttSlot, ttInterval, ttAcc = nil, 1, 0
-ttDriver:SetScript("OnUpdate", function(_, elapsed)
-    ttAcc = ttAcc + elapsed
-    if ttAcc < ttInterval then return end
-    ttAcc = 0
-    local sl = ttSlot
-    if not (sl and sl._spec and type(sl._spec.enter) == "function" and sl:IsMouseOver()) then
-        ttDriver:Hide(); ttSlot = nil; return
-    end
-    if InCombatLockdown() then return end   -- pause live refresh in combat
-    SafeCall(sl._spec.enter, sl)
-end)
+-- A single ticker drives the refresh (no per-frame OnUpdate cost). It fires only
+-- while a refresh-enabled tooltip is open and stops as soon as the cursor leaves.
+local ttTicker, ttSlot
+
+local function StopTooltipRefresh(slot)
+    if slot and ttSlot ~= slot then return end   -- don't cancel another slot's timer
+    if ttTicker then ttTicker:Cancel(); ttTicker = nil end
+    ttSlot = nil
+end
 
 local function StartTooltipRefresh(slot, spec)
     local iv = spec.tooltipRefresh
     if not iv then return end
+    StopTooltipRefresh()   -- cancel any existing ticker first
     ttSlot = slot
-    ttInterval = (type(iv) == "number" and iv > 0) and iv or 1
-    ttAcc = 0
-    ttDriver:Show()
-end
-local function StopTooltipRefresh(slot)
-    if ttSlot == slot then ttDriver:Hide(); ttSlot = nil end
+    local interval = (type(iv) == "number" and iv > 0) and iv or 1
+    ttTicker = C_Timer.NewTicker(interval, function()
+        local sl = ttSlot
+        -- Stop if the cursor left the slot or the tooltip is no longer ours.
+        if not (sl and sl._spec and type(sl._spec.enter) == "function"
+                and sl:IsMouseOver() and GameTooltip:IsOwned(sl)) then
+            StopTooltipRefresh(sl)
+            return
+        end
+        if InCombatLockdown() then return end   -- pause live refresh in combat
+        SafeCall(sl._spec.enter, sl)
+    end)
 end
 
 --- Detach any spec currently bound to the slot: stop events, cancel the ticker,

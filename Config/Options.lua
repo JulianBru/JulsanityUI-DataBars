@@ -335,6 +335,9 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.7-alpha4|r",
+    "- Reduced the CPU cost of the live tooltip refresh (timer + throttled scan).",
+    "",
     "|cffad00ffVersion 1.7-alpha3|r",
     "- System and Addons tooltips now refresh live every second (paused in combat).",
     "",

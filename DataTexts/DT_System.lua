@@ -119,6 +119,17 @@ local function FormatMem(kb)
     if kb >= 1024 then return format("%.1f MB", kb / 1024) end
     return format("%.0f KB", kb)
 end
+
+-- UpdateAddOnMemoryUsage() scans every addon and is expensive; throttle the real
+-- scan to at most once every 2s even if a tooltip re-renders faster.
+local lastMemScan = 0
+local function RefreshAddonMemory()
+    local now = GetTime()
+    if now - lastMemScan >= 2 then
+        UpdateAddOnMemoryUsage()
+        lastMemScan = now
+    end
+end
 Reg({
     name = "System", label = "System (FPS/MS)", category = "System", interval = 1.5,
     tooltipRefresh = 1,
@@ -159,7 +170,7 @@ Reg({
 
         local memCount = ns.SlotOpt(slot, "memCount", "5")
         if memCount ~= "off" then
-            UpdateAddOnMemoryUsage()
+            RefreshAddonMemory()
             local numAddons = (C_AddOns and C_AddOns.GetNumAddOns and C_AddOns.GetNumAddOns())
                 or (GetNumAddOns and GetNumAddOns()) or 0
             local list, total = {}, 0
@@ -207,7 +218,7 @@ end
 Reg({
     name = "Addons", label = "Addons", category = "System",
     events = { "PLAYER_ENTERING_WORLD", "ADDON_LOADED" },
-    tooltipRefresh = 1,
+    tooltipRefresh = 2,
     update = function(slot)
         local loaded = 0
         for i = 1, NumAddons() do
@@ -221,7 +232,7 @@ Reg({
         end
     end,
     enter = function(slot)
-        UpdateAddOnMemoryUsage()
+        RefreshAddonMemory()
         local list, total = {}, 0
         for i = 1, NumAddons() do
             if IsLoaded(i) then

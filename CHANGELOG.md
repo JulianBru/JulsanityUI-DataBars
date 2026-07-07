@@ -3,6 +3,14 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.7-alpha4] — 2026-07-07
+
+### Performance
+- Cut the CPU cost of the live tooltip refresh: it now uses a timer instead of a
+  per-frame handler, throttles the expensive addon-memory scan to at most once
+  every 2 seconds, and only refreshes while the tooltip is actually shown. The
+  Addons tooltip now refreshes every 2s.
+
 ## [1.7-alpha3] — 2026-07-07
 
 ### Added
