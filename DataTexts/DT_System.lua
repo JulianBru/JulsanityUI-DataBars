@@ -113,8 +113,12 @@ Reg({
 })
 
 --------------------------------------------------------------------------------
---  System  -  FPS + latency; tooltip: network breakdown
+--  System  -  FPS + latency; tooltip: network breakdown + addon memory
 --------------------------------------------------------------------------------
+local function FormatMem(kb)
+    if kb >= 1024 then return format("%.1f MB", kb / 1024) end
+    return format("%.0f KB", kb)
+end
 Reg({
     name = "System", label = "System (FPS/MS)", category = "System", interval = 1.5,
     options = {
@@ -122,6 +126,8 @@ Reg({
           values = { both = "FPS + MS", fps = "FPS", ms = "MS" }, order = { "both", "fps", "ms" } },
         { key = "latency", type = "dropdown", label = "Latency", default = "world",
           values = { world = "World", home = "Home" }, order = { "world", "home" } },
+        { key = "memCount", type = "dropdown", label = "Addon Memory", default = "5",
+          values = { off = "None", ["3"] = "3", ["5"] = "5", ["10"] = "10", all = "All" }, order = { "off", "3", "5", "10", "all" } },
     },
     update = function(slot)
         local fps = floor(GetFramerate())
@@ -149,6 +155,89 @@ Reg({
         if bwIn and bwIn > 0 then
             GameTooltip:AddDoubleLine("Bandwidth In", format("%.2f Mbps", bwIn), 1, 1, 1, 1, 1, 1)
         end
+
+        local memCount = ns.SlotOpt(slot, "memCount", "5")
+        if memCount ~= "off" then
+            UpdateAddOnMemoryUsage()
+            local numAddons = (C_AddOns and C_AddOns.GetNumAddOns and C_AddOns.GetNumAddOns())
+                or (GetNumAddOns and GetNumAddOns()) or 0
+            local list, total = {}, 0
+            for i = 1, numAddons do
+                local mem = GetAddOnMemoryUsage(i) or 0
+                if mem > 0 then
+                    local name = (C_AddOns and C_AddOns.GetAddOnInfo and (C_AddOns.GetAddOnInfo(i)))
+                        or (GetAddOnInfo and (GetAddOnInfo(i))) or ("AddOn " .. i)
+                    list[#list + 1] = { name = name, mem = mem }
+                    total = total + mem
+                end
+            end
+            table.sort(list, function(a, b) return a.mem > b.mem end)
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine("Addon Memory", 1, 1, 1)
+            local topN = (memCount == "all") and #list or (tonumber(memCount) or 5)
+            for i = 1, math.min(topN, #list) do
+                GameTooltip:AddDoubleLine(list[i].name, FormatMem(list[i].mem), 0.9, 0.9, 0.9, 1, 1, 1)
+            end
+            local ar, ag, ab = ns.EUI:GetAccent()
+            GameTooltip:AddDoubleLine("Total", FormatMem(total), 1, 1, 1, ar, ag, ab)
+        end
+
+        GameTooltip:Show()
+    end,
+    click = function() collectgarbage("collect") ns.Print("memory collected.") end,
+})
+
+--------------------------------------------------------------------------------
+--  Addons  -  number of loaded addons; tooltip: memory of every loaded addon
+--------------------------------------------------------------------------------
+local function IsLoaded(i)
+    if C_AddOns and C_AddOns.IsAddOnLoaded then return C_AddOns.IsAddOnLoaded(i) end
+    return IsAddOnLoaded and IsAddOnLoaded(i)
+end
+local function NumAddons()
+    return (C_AddOns and C_AddOns.GetNumAddOns and C_AddOns.GetNumAddOns())
+        or (GetNumAddOns and GetNumAddOns()) or 0
+end
+local function AddonName(i)
+    return (C_AddOns and C_AddOns.GetAddOnInfo and (C_AddOns.GetAddOnInfo(i)))
+        or (GetAddOnInfo and (GetAddOnInfo(i))) or ("AddOn " .. i)
+end
+
+Reg({
+    name = "Addons", label = "Addons", category = "System",
+    events = { "PLAYER_ENTERING_WORLD", "ADDON_LOADED" },
+    update = function(slot)
+        local loaded = 0
+        for i = 1, NumAddons() do
+            if IsLoaded(i) then loaded = loaded + 1 end
+        end
+        local hex = ns.ValueHex(slot)
+        if ns.WantPrefix(slot) then
+            slot.text:SetFormattedText("|cff%s%d|r |cffaaaaaaaddons|r", hex, loaded)
+        else
+            slot.text:SetFormattedText("|cff%s%d|r", hex, loaded)
+        end
+    end,
+    enter = function(slot)
+        UpdateAddOnMemoryUsage()
+        local list, total = {}, 0
+        for i = 1, NumAddons() do
+            if IsLoaded(i) then
+                local mem = GetAddOnMemoryUsage(i) or 0
+                list[#list + 1] = { name = AddonName(i), mem = mem }
+                total = total + mem
+            end
+        end
+        table.sort(list, function(a, b) return a.mem > b.mem end)
+        Engine.OpenTooltip(slot)
+        GameTooltip:AddLine(format("Addons (%d)", #list), 1, 1, 1)
+        GameTooltip:AddLine(" ")
+        for i = 1, #list do
+            GameTooltip:AddDoubleLine(list[i].name, FormatMem(list[i].mem), 0.9, 0.9, 0.9, 1, 1, 1)
+        end
+        GameTooltip:AddLine(" ")
+        local ar, ag, ab = ns.EUI:GetAccent()
+        GameTooltip:AddDoubleLine("Total", FormatMem(total), 1, 1, 1, ar, ag, ab)
         GameTooltip:Show()
     end,
     click = function() collectgarbage("collect") ns.Print("memory collected.") end,

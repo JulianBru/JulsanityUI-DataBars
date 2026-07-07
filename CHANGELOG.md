@@ -3,7 +3,19 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
-## [1.7] — 2026-07-07
+## [1.7-alpha2] — 2026-07-07
+
+### Added
+- New **Addons** datatext: shows the number of loaded addons; its tooltip lists
+  every loaded addon's memory usage and the total.
+- The **System (FPS/MS)** tooltip now shows addon memory usage, with an option
+  for how many addons to list (off / 3 / 5 / 10 / all).
+
+### Changed
+- Mythic+ Keystone "Abbreviate Dungeon" now uses initials (e.g. "Den of
+  Nalorakk" → "DoN") instead of cutting the name off.
+
+## [1.7-alpha1] — 2026-07-07
 
 Per-datatext customization and more languages.
 

@@ -335,7 +335,12 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
-    "|cffad00ffVersion 1.7|r",
+    "|cffad00ffVersion 1.7-alpha2|r",
+    "- New 'Addons' datatext: count of loaded addons + full memory tooltip.",
+    "- System (FPS/MS) tooltip now shows addon memory (off / 3 / 5 / 10 / all).",
+    "- Keystone abbreviation now uses initials (e.g. Den of Nalorakk -> DoN).",
+    "",
+    "|cffad00ffVersion 1.7-alpha1|r",
     "- Datatexts are now customizable: each has its own options under Behavior,",
     "  saved per slot (e.g. local vs. server clock, gold as 485K, FPS/MS only).",
     "- Added French, Spanish, Italian and Portuguese (BR) translations.",
