@@ -176,7 +176,11 @@ function Bar.Layout(bar)
 
     if horizontal then
         local barH  = max(L.height or 22, 4)
-        local slotH = max(barH - 2 * pad, 1)
+        -- Clamp the vertical padding so the slot always stays tall enough for the
+        -- text (never collapses or clips) no matter how high Padding is dragged.
+        local minSlotH = (c.appearance.fontSize or 12) + 4
+        local vpad  = math.min(pad, max(0, math.floor((barH - minSlotH) / 2)))
+        local slotH = max(barH - 2 * vpad, minSlotH)
 
         local barW
         if L.autoSize then
@@ -197,9 +201,10 @@ function Bar.Layout(bar)
             local slot = slots[idx]
             if slot then
                 slot:ClearAllPoints()
-                slot:SetPoint("TOPLEFT", f, "TOPLEFT", cursor, -pad)
+                slot:SetPoint("TOPLEFT", f, "TOPLEFT", cursor, -vpad)
                 slot:SetSize(widths[idx], slotH)
-                slot:SetHitRectInsets(-sp / 2, -sp / 2, -pad, -pad)
+                slot:SetHitRectInsets(-sp / 2, -sp / 2, -vpad, -vpad)
+                if slot.text then slot.text:SetWidth(max(widths[idx] - 2, 1)) end
             end
             cursor = cursor + widths[idx] + sp
         end
@@ -208,13 +213,17 @@ function Bar.Layout(bar)
         if c.appearance.showSeparators and n > 1 then
             local ar, ag, ab, aa = SepColor(c)
             local mult = PixelMult()
+            -- Separator height spans most of the bar, independent of the padded
+            -- slot height, so it stays visible at any Padding value.
+            local sepH = max(barH - 6, 4)
+            local sepTop = (barH - sepH) / 2
             for p = 1, n - 1 do
                 local sx = pad + p * w + (p - 1) * sp + sp / 2
                 local t = GetSeparator(bar, p)
                 t:SetColorTexture(ar, ag, ab, aa)
                 t:ClearAllPoints()
-                t:SetSize(mult, slotH)
-                t:SetPoint("TOPLEFT", f, "TOPLEFT", sx - mult / 2, -pad)
+                t:SetSize(mult, sepH)
+                t:SetPoint("TOPLEFT", f, "TOPLEFT", sx - mult / 2, -sepTop)
                 t:Show()
             end
             HideSeparatorsFrom(bar, n - 1)
@@ -249,6 +258,7 @@ function Bar.Layout(bar)
                 slot:SetPoint("TOPLEFT", f, "TOPLEFT", pad, -cursor)
                 slot:SetSize(widths[idx], slotH)
                 slot:SetHitRectInsets(-pad, -pad, -sp / 2, -sp / 2)
+                if slot.text then slot.text:SetWidth(max(widths[idx] - 2, 1)) end
             end
             cursor = cursor + slotH + sp
         end

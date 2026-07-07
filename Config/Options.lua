@@ -98,7 +98,7 @@ local function BuildLayout(parent, y)
     _, h = W:Slider(parent, L["Height"], y, 8, 80, 1,
         function() return c.layout.height end,
         function(v) c.layout.height = v; ns.Events:Fire(MSG.LAYOUT_CHANGED) end); y = y - h
-    _, h = W:Slider(parent, L["Padding"], y, 0, 30, 1,
+    _, h = W:Slider(parent, L["Padding"], y, 0, 15, 1,
         function() return c.layout.padding end,
         function(v) c.layout.padding = v; ns.Events:Fire(MSG.LAYOUT_CHANGED) end); y = y - h
     _, h = W:Slider(parent, L["Spacing"], y, 0, 40, 1,
@@ -140,10 +140,19 @@ local function BuildAppearance(parent, y)
         function() return c.appearance.fontOutline end,
         function(v) c.appearance.fontOutline = v; ns.Events:Fire(MSG.FONT_CHANGED) end,
         { "NONE", "OUTLINE", "THICKOUTLINE" }); y = y - h
+    _, h = W:Toggle(parent, L["Use Custom Text Color"], y,
+        function() return c.appearance.useCustomTextColor end,
+        function(v)
+            c.appearance.useCustomTextColor = v
+            ns.Events:Fire(MSG.FONT_CHANGED); ns.Events:Fire(MSG.VALUES_CHANGED)
+        end); y = y - h
     _, h = W:ColorPicker(parent, L["Text Color"], y,
         function() local t = c.appearance.textColor; return t[1], t[2], t[3], t[4] end,
-        function(r, g, b, a) c.appearance.textColor = { r, g, b, a }; ns.Events:Fire(MSG.FONT_CHANGED) end,
-        true); y = y - h
+        function(r, g, b, a)
+            c.appearance.textColor = { r, g, b, a }
+            c.appearance.useCustomTextColor = true
+            ns.Events:Fire(MSG.FONT_CHANGED); ns.Events:Fire(MSG.VALUES_CHANGED)
+        end, true); y = y - h
 
     _, h = W:SectionHeader(parent, L["Background Color"], y); y = y - h
     local texValues, texOrder = ns.EUI:GetStatusbarList()
@@ -289,6 +298,14 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.6.1|r",
+    "- Text Color now recolours the datatext values, incl. the good state of FPS,",
+    "  durability and reputation (warning colours are kept).",
+    "- Difficulty menu now also offers legacy raid difficulties (10/25-player).",
+    "- Fixed Padding squeezing fields until they disappeared; now always readable.",
+    "- Section separators stay visible at any Padding value.",
+    "- Long values (like long spec names) now truncate instead of overlapping.",
+    "",
     "|cffad00ffVersion 1.6|r",
     "- New About tab: makes clear this is an independent plugin for EllesmereUI,",
     "  with CurseForge, GitHub and this Changelog.",

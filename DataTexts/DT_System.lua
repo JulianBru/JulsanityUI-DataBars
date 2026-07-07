@@ -13,10 +13,12 @@ local format = string.format
 local function AccentHex() return U.RGBToHex(ns.EUI:GetAccent()) end
 
 -- Threshold colour: good (accent) / warn (amber) / bad (red), returned as hex.
-local function StatusHex(value, goodAt, warnAt, invert)
-    local good, warn, bad = "ffd700", "ffc800", "ff4719"
-    local r, g, b = ns.EUI:GetAccent()
-    good = U.RGBToHex(r, g, b)
+local function StatusHex(slot, value, goodAt, warnAt, invert)
+    local warn, bad = "ffc800", "ff4719"
+    -- The "good" tier uses the datatext value colour (custom text colour when the
+    -- bar enables it, otherwise the EllesmereUI accent). Warn/bad stay as the
+    -- yellow/red warning colours so low FPS / low durability still stand out.
+    local good = ns.ValueHex(slot)
     local ok
     if invert then ok = value <= goodAt else ok = value >= goodAt end
     if ok then return good end
@@ -33,7 +35,7 @@ Reg({
     name = "Time", label = "Time", category = "System", interval = 2,
     update = function(slot)
         local h, m = GetGameTime()
-        slot.text:SetFormattedText("|cff%s%d:%02d|r", AccentHex(), h, m)
+        slot.text:SetFormattedText("|cff%s%d:%02d|r", ns.ValueHex(slot), h, m)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -90,8 +92,8 @@ Reg({
         local _, _, lh, lw = GetNetStats()
         local lat = max(lh or 0, lw or 0)
         slot.text:SetFormattedText("|cff%s%d fps|r  |cff%s%d ms|r",
-            StatusHex(fps, 50, 25, false), fps,
-            StatusHex(lat, 100, 250, true), lat)
+            StatusHex(slot, fps, 50, 25, false), fps,
+            StatusHex(slot, lat, 100, 250, true), lat)
     end,
     enter = function(slot)
         local _, bwIn, latHome, latWorld = GetNetStats()
@@ -146,7 +148,7 @@ Reg({
         end
         slot._duraTries = 0
         local pre = ns.WantPrefix(slot) and "Dur " or ""
-        slot.text:SetFormattedText("|cff%s%s%d%%|r", StatusHex(lowest, 60, 30, false), pre, lowest)
+        slot.text:SetFormattedText("|cff%s%s%d%%|r", StatusHex(slot, lowest, 60, 30, false), pre, lowest)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -158,7 +160,7 @@ Reg({
             if c and m and m > 0 then
                 any = true
                 local pct = floor(c / m * 100)
-                local hex = StatusHex(pct, 60, 30, false)
+                local hex = StatusHex(slot, pct, 60, 30, false)
                 GameTooltip:AddDoubleLine(name, ("|cff%s%d%%|r"):format(hex, pct), 1, 1, 1)
             end
         end

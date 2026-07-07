@@ -29,9 +29,9 @@ Reg({
     update = function(slot)
         local wowOnline, _, bnOnline = FriendCounts()
         if ns.WantPrefix(slot) then
-            slot.text:SetFormattedText("|cffaaaaaaFriends:|r |cff%s%d|r", AccentHex(), wowOnline + bnOnline)
+            slot.text:SetFormattedText("|cffaaaaaaFriends:|r |cff%s%d|r", ns.ValueHex(slot), wowOnline + bnOnline)
         else
-            slot.text:SetFormattedText("|cff%s%d|r", AccentHex(), wowOnline + bnOnline)
+            slot.text:SetFormattedText("|cff%s%d|r", ns.ValueHex(slot), wowOnline + bnOnline)
         end
     end,
     enter = function(slot)
@@ -64,9 +64,9 @@ Reg({
         if C_GuildInfo and C_GuildInfo.GuildRoster then C_GuildInfo.GuildRoster() end
         local _, online = GetNumGuildMembers()
         if ns.WantPrefix(slot) then
-            slot.text:SetFormattedText("|cffaaaaaaGuild:|r |cff%s%d|r", AccentHex(), online or 0)
+            slot.text:SetFormattedText("|cffaaaaaaGuild:|r |cff%s%d|r", ns.ValueHex(slot), online or 0)
         else
-            slot.text:SetFormattedText("|cff%s%d|r", AccentHex(), online or 0)
+            slot.text:SetFormattedText("|cff%s%d|r", ns.ValueHex(slot), online or 0)
         end
     end,
     enter = function(slot)
@@ -108,7 +108,7 @@ Reg({
     events = { "MAIL_INBOX_UPDATE", "UPDATE_PENDING_MAIL", "MAIL_CLOSED", "MAIL_SHOW", "PLAYER_ENTERING_WORLD" },
     update = function(slot)
         if HasNewMail and HasNewMail() then
-            slot.text:SetFormattedText("|cff%sNew Mail|r", AccentHex())
+            slot.text:SetFormattedText("|cff%sNew Mail|r", ns.ValueHex(slot))
         else
             slot.text:SetText("|cffaaaaaaNo Mail|r")
         end

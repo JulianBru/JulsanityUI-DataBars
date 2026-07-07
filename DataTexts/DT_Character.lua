@@ -220,7 +220,7 @@ Reg({
         local _, equipped = GetAverageItemLevel()
         if not equipped then slot.text:SetText("N/A"); return end
         local suf = ns.WantPrefix(slot) and " ilvl" or ""
-        slot.text:SetFormattedText("|cff%s%.0f%s|r", AccentHex(), equipped, suf)
+        slot.text:SetFormattedText("|cff%s%.0f%s|r", ns.ValueHex(slot), equipped, suf)
     end,
     enter = function(slot)
         if not GetAverageItemLevel then return end
@@ -257,12 +257,12 @@ Reg({
     update = function(slot)
         local maxXP = UnitXPMax("player")
         if not maxXP or maxXP == 0 or IsXPUserDisabled() then
-            slot.text:SetFormattedText("|cff%sMax Level|r", AccentHex())
+            slot.text:SetFormattedText("|cff%sMax Level|r", ns.ValueHex(slot))
             return
         end
         local cur = UnitXP("player") or 0
         local pre = ns.WantPrefix(slot) and "XP " or ""
-        slot.text:SetFormattedText("%s|cff%s%.1f%%|r", pre, AccentHex(), cur / maxXP * 100)
+        slot.text:SetFormattedText("%s|cff%s%.1f%%|r", pre, ns.ValueHex(slot), cur / maxXP * 100)
     end,
     enter = function(slot)
         local maxXP = UnitXPMax("player")
@@ -295,7 +295,7 @@ Reg({
         local current = GetUnitSpeed("player") or 0
         local pct = current / BASE_MOVEMENT_SPEED * 100   -- BASE_MOVEMENT_SPEED = 7
         local pre = ns.WantPrefix(slot) and "Speed " or ""
-        slot.text:SetFormattedText("%s|cff%s%.0f%%|r", pre, AccentHex(), pct)
+        slot.text:SetFormattedText("%s|cff%s%.0f%%|r", pre, ns.ValueHex(slot), pct)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -333,7 +333,7 @@ Reg({
     events = { "BAG_UPDATE", "PLAYER_ENTERING_WORLD", "BAG_UPDATE_DELAYED" },
     update = function(slot)
         local free, total = CountBags()
-        slot.text:SetFormattedText("|cff%s%d|r |cffaaaaaa/ %d|r", AccentHex(), free, total)
+        slot.text:SetFormattedText("|cff%s%d|r |cffaaaaaa/ %d|r", ns.ValueHex(slot), free, total)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -382,7 +382,13 @@ Reg({
         local span = hi - lo
         local pct = span > 0 and (cur - lo) / span * 100 or 100
         local col = REP_COLORS[d.reaction] or { 1, 1, 1 }
-        slot.text:SetFormattedText("|cff%s%.0f%%|r", U.RGBToHex(col[1], col[2], col[3]), pct)
+        local hex = U.RGBToHex(col[1], col[2], col[3])
+        -- "Good" standing (friendly+ = green) follows the custom text colour when
+        -- enabled; lower standings keep their warning colours.
+        if d.reaction and d.reaction >= 5 then
+            hex = ns.ColorOr(slot, hex)
+        end
+        slot.text:SetFormattedText("|cff%s%.0f%%|r", hex, pct)
     end,
     enter = function(slot)
         local d = WatchedFaction()

@@ -17,6 +17,7 @@ local function AccentHex() return U.RGBToHex(ns.EUI:GetAccent()) end
 -- Selectable difficulties (M+ is keystone-driven, not a manual choice here).
 local DUNGEON_IDS = { 1, 2, 23 }              -- Normal, Heroic, Mythic
 local RAID_IDS    = { 17, 14, 15, 16 }        -- LFR, Normal, Heroic, Mythic
+local LEGACY_RAID_IDS = { 3, 4, 5, 6 }        -- 10/25 Player (Normal/Heroic), legacy raids
 
 -- Compact abbreviations for the bar text.
 local ABBR = { [1] = "N", [2] = "HC", [23] = "M", [17] = "LFR", [14] = "N", [15] = "HC", [16] = "M" }
@@ -27,6 +28,7 @@ local function DiffName(id)
 end
 local function CurDungeon() return (GetDungeonDifficultyID and GetDungeonDifficultyID()) or 1 end
 local function CurRaid()    return (GetRaidDifficultyID and GetRaidDifficultyID()) or 14 end
+local function CurLegacyRaid() return (GetLegacyRaidDifficultyID and GetLegacyRaidDifficultyID()) or 3 end
 
 local function OpenMenu(slot)
     if not (MenuUtil and MenuUtil.CreateContextMenu) then
@@ -47,6 +49,15 @@ local function OpenMenu(slot)
                 function() return CurRaid() == id end,
                 function() if SetRaidDifficultyID then SetRaidDifficultyID(id) end end)
         end
+        if SetLegacyRaidDifficultyID then
+            root:CreateDivider()
+            root:CreateTitle(L["Legacy Raid Difficulty"])
+            for _, id in ipairs(LEGACY_RAID_IDS) do
+                root:CreateRadio(DiffName(id),
+                    function() return CurLegacyRaid() == id end,
+                    function() SetLegacyRaidDifficultyID(id) end)
+            end
+        end
     end)
 end
 
@@ -54,7 +65,7 @@ Reg({
     name = "Difficulty", label = "Difficulty", category = "PvE",
     events = { "PLAYER_DIFFICULTY_CHANGED", "UPDATE_INSTANCE_INFO", "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE" },
     update = function(slot)
-        local hex = AccentHex()
+        local hex = ns.ValueHex(slot)
         if ns.WantPrefix(slot) then
             slot.text:SetFormattedText("|cffaaaaaaDiff|r |cff%s%s|r|cffaaaaaa/|r|cff%s%s|r",
                 hex, ABBR[CurDungeon()] or "?", hex, ABBR[CurRaid()] or "?")

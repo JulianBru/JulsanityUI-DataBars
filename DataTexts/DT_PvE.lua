@@ -27,7 +27,7 @@ Reg({
         if color then
             slot.text:SetFormattedText("|cff%s%s%d|r", U.RGBToHex(color.r, color.g, color.b), pre, score)
         else
-            slot.text:SetFormattedText("|cff%s%s%d|r", AccentHex(), pre, score)
+            slot.text:SetFormattedText("|cff%s%s%d|r", ns.ValueHex(slot), pre, score)
         end
     end,
     enter = function(slot)
@@ -72,7 +72,7 @@ Reg({
         end
         local name = C_ChallengeMode.GetMapUIInfo and (C_ChallengeMode.GetMapUIInfo(mapID)) or "Key"
         if #name > 10 then name = name:sub(1, 9) .. "." end
-        slot.text:SetFormattedText("|cff%s+%d|r %s", AccentHex(), level, name)
+        slot.text:SetFormattedText("|cff%s+%d|r %s", ns.ValueHex(slot), level, name)
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -110,9 +110,9 @@ Reg({
         end
         local pre = ns.WantPrefix(slot) and "Vault " or ""
         if C_WeeklyRewards.HasAvailableRewards and C_WeeklyRewards.HasAvailableRewards() then
-            slot.text:SetFormattedText("|cff%s%sReady|r", AccentHex(), pre)
+            slot.text:SetFormattedText("|cff%s%sReady|r", ns.ValueHex(slot), pre)
         else
-            slot.text:SetFormattedText("%s|cff%s%d|r|cffaaaaaa/%d|r", pre, AccentHex(), unlocked, #activities)
+            slot.text:SetFormattedText("%s|cff%s%d|r|cffaaaaaa/%d|r", pre, ns.ValueHex(slot), unlocked, #activities)
         end
     end,
     enter = function(slot)
@@ -182,7 +182,7 @@ Reg({
         local idx = GetSpecialization and GetSpecialization()
         if not idx then slot.text:SetText("|cffaaaaaaNo Spec|r"); return end
         local _, name = GetSpecializationInfo(idx)
-        slot.text:SetFormattedText("|cff%s%s|r", AccentHex(), name or "Spec")
+        slot.text:SetFormattedText("|cff%s%s|r", ns.ValueHex(slot), name or "Spec")
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)
@@ -239,7 +239,7 @@ Reg({
             name = select(2, GetSpecializationInfoByID(lootID))
         end
         local pre = ns.WantPrefix(slot) and "Loot: " or ""
-        slot.text:SetFormattedText("|cff%s%s%s|r", AccentHex(), pre, name or "?")
+        slot.text:SetFormattedText("|cff%s%s%s|r", ns.ValueHex(slot), pre, name or "?")
     end,
     enter = function(slot)
         Engine.OpenTooltip(slot)

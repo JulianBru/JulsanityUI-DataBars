@@ -111,7 +111,12 @@ function Renderer:ApplyText(bar, slot)
     local outline  = (A.fontOutline and A.fontOutline ~= "NONE") and A.fontOutline or ""
     slot.text:SetFont(fontPath, A.fontSize or 12, outline)
 
-    local r, g, b, a = unpackColor(A.textColor, 1, 1, 1, 0.9)
+    local r, g, b, a
+    if A.useCustomTextColor and type(A.textColor) == "table" then
+        r, g, b, a = unpackColor(A.textColor, 1, 1, 1, 0.9)
+    else
+        r, g, b, a = 1, 1, 1, 0.9
+    end
     slot.text:SetTextColor(r, g, b, a)
     slot._baseColor = { r, g, b, a }
 end

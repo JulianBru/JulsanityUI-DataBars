@@ -45,6 +45,7 @@ local function BaseBar()
             fontSize    = 12,
             fontOutline = "NONE",
             textColor   = { 1, 1, 1, 0.9 },
+            useCustomTextColor = false,   -- true = colour datatext values with textColor
             bgColor     = { 0.03, 0.045, 0.05, 0.9 },
             bgTexture   = nil,       -- nil = solid colour; else a LibSharedMedia statusbar name
             border      = true,

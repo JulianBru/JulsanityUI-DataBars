@@ -3,6 +3,29 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.6.1] — 2026-07-07
+
+Polish and fixes for layout and text colouring.
+
+### Added
+- **Use Custom Text Color** — Text Color now actually recolours the datatext
+  values, including the "good" state of status/standing datatexts (FPS,
+  durability, reputation). Warning colours (low FPS/durability, low reputation)
+  and iconic colours (gold coins, Mythic+ score rarity) are kept.
+- **Difficulty** datatext: the click menu now also offers the legacy raid
+  difficulties (10/25-player, Normal and Heroic).
+
+### Changed
+- Padding now adapts to the font size and its maximum was lowered to a sensible
+  range, so datatext fields always stay readable.
+
+### Fixed
+- Dragging Padding could squeeze datatext fields until they vanished; they now
+  stay visible at any padding value.
+- Section separators no longer collapse (they keep full height) at high padding.
+- Long datatext values (e.g. long specialization names) now truncate with "…"
+  instead of overlapping the neighbouring fields.
+
 ## [1.6] — 2026-07-04
 
 Quality-of-life features, its own identity, and a first-login fix.

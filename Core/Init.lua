@@ -110,3 +110,29 @@ function ns.WantPrefix(slot)
     local c = bar and ns.BarCfg and ns.BarCfg(bar.index)
     return not (c and c.appearance and c.appearance.hidePrefix)
 end
+
+-- Hex colour a datatext should use for its main VALUE: the bar's custom text
+-- colour when enabled, otherwise the EllesmereUI accent. Semantic colours
+-- (gold, durability, reputation, ...) are set explicitly and ignore this.
+function ns.ValueHex(slot)
+    local bar = slot and slot._bar
+    local c = bar and ns.BarCfg and ns.BarCfg(bar.index)
+    local a = c and c.appearance
+    if a and a.useCustomTextColor and type(a.textColor) == "table" then
+        return ns.Util.RGBToHex(a.textColor[1] or 1, a.textColor[2] or 1, a.textColor[3] or 1)
+    end
+    return ns.Util.RGBToHex(ns.EUI:GetAccent())
+end
+
+-- Returns the bar's custom text colour hex when enabled, otherwise the supplied
+-- fallback hex. Used to override a datatext's "good" tier (e.g. friendly+ rep)
+-- with the custom text colour while keeping its warning colours.
+function ns.ColorOr(slot, fallbackHex)
+    local bar = slot and slot._bar
+    local c = bar and ns.BarCfg and ns.BarCfg(bar.index)
+    local a = c and c.appearance
+    if a and a.useCustomTextColor and type(a.textColor) == "table" then
+        return ns.Util.RGBToHex(a.textColor[1] or 1, a.textColor[2] or 1, a.textColor[3] or 1)
+    end
+    return fallbackHex
+end

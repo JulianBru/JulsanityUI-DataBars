@@ -2,7 +2,7 @@
 ## Title: |cffad00ffJulsanityUI|r DataBars
 ## Notes: ElvUI-style configurable data texts, native to EllesmereUI's look & feel
 ## Author: Julsanity (CheersItsJulian)
-## Version: 1.6
+## Version: 1.6.1
 ## X-Curse-Project-ID: 1594567
 ## Dependencies: EllesmereUI
 ## OptionalDeps: Syndicator
