@@ -6,6 +6,12 @@ package-as: JulsanityUI_DataBars
 # No embedded libraries in this addon, so no nolib build is needed.
 enable-nolib-creation: no
 
+# Use our curated CHANGELOG.md (rendered as Markdown) for the CurseForge
+# changelog instead of the auto-generated git-commit list.
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
 # Files/folders kept in the repo but excluded from the published zip.
 ignore:
   - _ref
