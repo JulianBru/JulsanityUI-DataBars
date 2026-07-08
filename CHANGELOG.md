@@ -3,44 +3,17 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
-## [1.7-alpha4] — 2026-07-07
+## [1.7] — 2026-07-07
 
-### Performance
-- Cut the CPU cost of the live tooltip refresh: it now uses a timer instead of a
-  per-frame handler, throttles the expensive addon-memory scan to at most once
-  every 2 seconds, and only refreshes while the tooltip is actually shown. The
-  Addons tooltip now refreshes every 2s.
-
-## [1.7-alpha3] — 2026-07-07
+Per-datatext customization, new datatexts, and more languages.
 
 ### Added
-- Live tooltip refresh: the **System (FPS/MS)** and **Addons** tooltips now
-  update once per second while open, so memory and latency values stay current.
-  Paused while in combat.
-
-## [1.7-alpha2] — 2026-07-07
-
-### Added
-- New **Addons** datatext: shows the number of loaded addons; its tooltip lists
-  every loaded addon's memory usage and the total.
-- The **System (FPS/MS)** tooltip now shows addon memory usage, with an option
-  for how many addons to list (off / 3 / 5 / 10 / all).
-
-### Changed
-- Mythic+ Keystone "Abbreviate Dungeon" now uses initials (e.g. "Den of
-  Nalorakk" → "DoN") instead of cutting the name off.
-
-## [1.7-alpha1] — 2026-07-07
-
-Per-datatext customization and more languages.
-
-### Added
-- **Customizable datatexts.** Most datatexts now have their own options, shown in
-  the Behavior tab beneath the datatext and saved per slot (so two clocks can
-  differ). Highlights:
+- **Customizable datatexts.** Most datatexts now have their own options in the
+  Behavior tab, saved per slot (so, e.g., two clocks can differ). Highlights:
   - Time: local vs. server time, 12/24-hour.
   - Coordinates: show zone, decimals.
-  - System: FPS / MS / both, home vs. world latency.
+  - System (FPS/MS): FPS / MS / both, home vs. world latency, and addon memory in
+    the tooltip (off / 3 / 5 / 10 / all).
   - Durability: lowest slot vs. average.
   - Gold: short numbers (485K), gold only, gold gained this session.
   - Bag Space: free vs. used, count the reagent bag.
@@ -52,12 +25,22 @@ Per-datatext customization and more languages.
   - Guild: online vs. online / total.
   - Difficulty: dungeon / raid / both, abbreviated vs. full names.
   - Great Vault: "Ready" vs. count.
-  - Mythic+ Keystone: abbreviate the dungeon name.
+  - Mythic+ Keystone: abbreviate the dungeon name to initials
+    (e.g. "Den of Nalorakk" -> "DoN").
+- **New Addons datatext:** shows the number of loaded addons; its tooltip lists
+  every loaded addon's memory usage and the total.
+- **Live tooltip refresh:** the System (FPS/MS) and Addons tooltips update while
+  open so memory and latency values stay current (paused while in combat).
 - **Four new languages:** French, Spanish (also esMX), Italian and Portuguese (BR).
 
 ### Fixed
 - The options window no longer jumps back to the top when you change a datatext;
   the scroll position is preserved.
+
+### Performance
+- The live tooltip refresh is lightweight: it uses a timer (not a per-frame
+  handler), throttles the expensive addon-memory scan, and only runs while the
+  tooltip is actually shown.
 
 ## [1.6.1] — 2026-07-07
 
