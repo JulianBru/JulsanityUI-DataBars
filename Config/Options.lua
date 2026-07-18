@@ -17,6 +17,7 @@ local MSG = ns.MSG
 local PAGE_LAYOUT     = "Layout"
 local PAGE_APPEARANCE = "Appearance"
 local PAGE_BEHAVIOR   = "Behavior"
+local PAGE_GENERAL    = "General"
 local PAGE_ADVANCED   = "Advanced"
 local PAGE_ABOUT      = "About"
 
@@ -335,6 +336,16 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.8|r",
+    "- New General tab (account-wide): Window Scale for the config window, and a",
+    "  Minimap Button on/off toggle.",
+    "- Minimap button (via LibDBIcon) opens the config; position is saved",
+    "  account-wide. Also registers a LibDataBroker launcher for panel addons.",
+    "- New datatexts: PvP (Honor/Conquest/Rating), Talent Loadout, Secondary Stats,",
+    "  Currency, Equipment Set, Warband Bank and Guild Bank.",
+    "- Fixed: account-wide settings (Window Scale) now persist between sessions.",
+    "- Verified compatible with the WoW 12.1 (Midnight) client.",
+    "",
     "|cffad00ffVersion 1.7|r",
     "- Customizable datatexts: each has its own options in the Behavior tab",
     "  (e.g. local/server clock, gold as 485K, FPS/MS only, and much more).",
@@ -622,9 +633,32 @@ local function BuildAbout(parent, y)
 end
 
 --------------------------------------------------------------------------------
+--  General (account-wide settings; no bar selector)
+--------------------------------------------------------------------------------
+local function BuildGeneral(parent, y)
+    local W = EllesmereUI.Widgets
+    local g = ns.General()
+    local _, h
+    _, h = W:SectionHeader(parent, L["General"], y); y = y - h
+    _, h = W:Slider(parent, L["Window Scale"], y, 0.6, 1.5, 0.05,
+        function() return (g and g.windowScale) or 1.0 end,
+        function(v)
+            if g then g.windowScale = v end
+            if ns.Window and ns.Window.ApplyScale then ns.Window:ApplyScale() end
+        end); y = y - h
+    _, h = W:Toggle(parent, L["Minimap Button"], y,
+        function() return not (g and g.minimap and g.minimap.hide) end,
+        function(v)
+            if g and g.minimap then g.minimap.hide = not v end
+            if ns.MinimapButton and ns.MinimapButton.ApplyShown then ns.MinimapButton:ApplyShown() end
+        end); y = y - h
+    return y
+end
+
+--------------------------------------------------------------------------------
 --  Shared page dispatch (used by the standalone options window)
 --------------------------------------------------------------------------------
-Config.PAGES = { PAGE_LAYOUT, PAGE_APPEARANCE, PAGE_BEHAVIOR, PAGE_ADVANCED, PAGE_ABOUT }
+Config.PAGES = { PAGE_GENERAL, PAGE_LAYOUT, PAGE_APPEARANCE, PAGE_BEHAVIOR, PAGE_ADVANCED, PAGE_ABOUT }
 
 function Config.BuildPage(pageName, parent, yOffset)
     local y = yOffset or -6
@@ -634,6 +668,8 @@ function Config.BuildPage(pageName, parent, yOffset)
         y = BuildAppearance(parent, y)
     elseif pageName == PAGE_BEHAVIOR then
         y = BuildBehavior(parent, y)
+    elseif pageName == PAGE_GENERAL then
+        y = BuildGeneral(parent, y)
     elseif pageName == PAGE_ADVANCED then
         y = BuildAdvanced(parent, y)
     elseif pageName == PAGE_ABOUT then

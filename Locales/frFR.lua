@@ -146,3 +146,10 @@ L["Count"] = "Nombre"
 L["Abbreviate Dungeon"] = "Abréger le donjon"
 L["Addon Memory"]      = "Mémoire des addons"
 L["All"]               = "Tous"
+
+-- General tab (1.8)
+L["General"] = "Général"
+L["Window Scale"] = "Échelle de la fenêtre"
+L["Minimap Button"] = "Bouton de la minicarte"
+L["Left-click: open configuration"] = "Clic gauche : ouvrir la configuration"
+L["Drag to reposition."] = "Glisser pour repositionner."

@@ -146,3 +146,10 @@ L["Count"] = "Conteggio"
 L["Abbreviate Dungeon"] = "Abbrevia spedizione"
 L["Addon Memory"]      = "Memoria addon"
 L["All"]               = "Tutti"
+
+-- General tab (1.8)
+L["General"] = "Generale"
+L["Window Scale"] = "Scala finestra"
+L["Minimap Button"] = "Pulsante minimappa"
+L["Left-click: open configuration"] = "Clic sinistro: apri configurazione"
+L["Drag to reposition."] = "Trascina per riposizionare."

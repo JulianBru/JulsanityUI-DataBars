@@ -93,6 +93,15 @@ end
 local DEFAULT_PROFILE = DefaultProfile()
 ns.DEFAULT_PROFILE = DEFAULT_PROFILE
 
+-- Account-wide settings, independent of the profile (General tab).
+local DEFAULT_GENERAL = {
+    windowScale = 1.0,   -- scale of the standalone config window only
+    minimap = {          -- minimap button (LibDBIcon-style), account-wide
+        hide       = false,
+        minimapPos = 225,   -- angle in degrees around the minimap
+    },
+}
+
 --------------------------------------------------------------------------------
 --  Internal state
 --------------------------------------------------------------------------------
@@ -160,6 +169,10 @@ function DB:Initialize()
     sv.profiles      = sv.profiles or {}
     sv.activeProfile = sv.activeProfile or "Default"
     sv.profileKeys   = sv.profileKeys or {}
+
+    -- Account-wide settings (General tab): scale + minimap button.
+    sv.general = sv.general or {}
+    U.MergeDefaults(sv.general, DEFAULT_GENERAL)
 
     RunMigrations()
 
@@ -244,4 +257,9 @@ end
 -- ns.BarCfg(index) returns a single bar's config block.
 function ns.BarCfg(index)
     return profile and profile.bars and profile.bars[index]
+end
+
+-- ns.General() returns the account-wide settings table (General tab).
+function ns.General()
+    return sv and sv.general
 end

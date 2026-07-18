@@ -103,6 +103,7 @@ function Window:Build()
     f:SetScript("OnDragStop", function() f:StopMovingOrSizing() end)
     f:Hide()
     self.frame = f
+    self:ApplyScale()
 
     -- Background
     local bg = f:CreateTexture(nil, "BACKGROUND")
@@ -208,6 +209,15 @@ function Window:Build()
 end
 
 --------------------------------------------------------------------------------
+--  Scale (config window only)
+--------------------------------------------------------------------------------
+function Window:ApplyScale()
+    if not self.frame then return end
+    local g = ns.General and ns.General()
+    self.frame:SetScale((g and g.windowScale) or 1.0)
+end
+
+--------------------------------------------------------------------------------
 --  Content
 --------------------------------------------------------------------------------
 function Window:BuildContent(keepScroll)
@@ -257,6 +267,7 @@ function Window:Toggle()
         if SettingsPanel and SettingsPanel:IsShown() then
             HideUIPanel(SettingsPanel)
         end
+        self:ApplyScale()
         UpdateTabHighlight(self)
         self:BuildContent()
         self.frame:Show()

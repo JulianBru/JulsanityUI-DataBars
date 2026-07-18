@@ -3,6 +3,40 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.8] — 2026-07-18
+
+A General tab, a minimap button, and a batch of new datatexts.
+
+### Added
+- **General tab.** New account-wide settings tab (shown first), independent of
+  bar profiles:
+  - **Window Scale** — scales the JulsanityUI DataBars config window only (not
+    the whole UI).
+  - **Minimap Button** — on/off toggle for the minimap icon.
+- **Minimap button.** A minimap icon (via LibDBIcon) that opens the config
+  window; drag it around the minimap. Its position is saved account-wide, so it
+  sits in the same place on every character. A LibDataBroker launcher is also
+  registered, so panel-display addons (Titan Panel, ChocolateBar, Bazooka, ...)
+  can surface JulsanityUI DataBars too.
+- **Seven new datatexts:**
+  - **PvP** — Honor, Conquest or rated arena/BG rating (selectable); tooltip
+    shows honor level, conquest cap and every rated bracket.
+  - **Talent Loadout** — the active build's name; tooltip lists your saved
+    loadouts for the current spec.
+  - **Secondary Stats** — crit / haste / mastery / versatility, all together or
+    one at a time.
+  - **Currency** — your tracked currencies with icons; tooltip lists them all.
+  - **Equipment Set** — the equipped set; click to switch sets from a menu.
+  - **Warband Bank** — account (warband) bank gold, read live.
+  - **Guild Bank** — guild bank gold (updates once you open the guild bank).
+
+### Fixed
+- Account-wide settings (Window Scale) now actually persist between sessions.
+
+### Compatibility
+- Verified against the WoW 12.1 (Midnight) client and marked compatible
+  (Interface 120100).
+
 ## [1.7] — 2026-07-07
 
 Per-datatext customization, new datatexts, and more languages.

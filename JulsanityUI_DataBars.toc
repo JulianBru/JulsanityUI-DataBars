@@ -1,8 +1,8 @@
-## Interface: 120000, 120001, 120005, 120007
+## Interface: 120000, 120001, 120005, 120007, 120100
 ## Title: |cffad00ffJulsanityUI|r DataBars
 ## Notes: ElvUI-style configurable data texts, native to EllesmereUI's look & feel
 ## Author: Julsanity (CheersItsJulian)
-## Version: 1.7
+## Version: 1.8
 ## X-Curse-Project-ID: 1594567
 ## Dependencies: EllesmereUI
 ## OptionalDeps: Syndicator
@@ -10,6 +10,8 @@
 ## IconTexture: Interface\AddOns\JulsanityUI_DataBars\Media\JulsanityUI.tga
 
 Core\Init.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 Locales\enUS.lua
 Locales\deDE.lua
 Locales\esES.lua
@@ -28,11 +30,14 @@ DataTexts\DT_Character.lua
 DataTexts\DT_Social.lua
 DataTexts\DT_PvE.lua
 DataTexts\DT_Difficulty.lua
+DataTexts\DT_PvP.lua
+DataTexts\DT_Extra.lua
 Modules\Slot.lua
 Modules\Renderer.lua
 Modules\Anchor.lua
 Modules\Visibility.lua
 Modules\Bar.lua
+Modules\MinimapButton.lua
 API\API.lua
 Config\ImportExport.lua
 Config\Profiles.lua

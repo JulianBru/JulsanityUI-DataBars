@@ -24,6 +24,7 @@ function addon:OnEnable()
         ns.Visibility:ApplyOne(bar)
     end)
     if ns.Window and ns.Window.RegisterCategory then ns.Window:RegisterCategory() end  -- Blizzard Options > AddOns
+    if ns.MinimapButton and ns.MinimapButton.Create then ns.MinimapButton:Create() end  -- minimap icon + LDB launcher
     if ns.EUI.HookAccent then ns.EUI:HookAccent() end   -- re-render when EllesmereUI applies its accent
 
     -- Safety net: EllesmereUI often applies the saved accent a moment after
