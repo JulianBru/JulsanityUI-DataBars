@@ -56,6 +56,11 @@ local function BuildBarSelector(parent, y)
     local W = EllesmereUI.Widgets
     local _, h
 
+    -- Keep the selection within the current bar set (a bar may have been removed).
+    local count = #ns.BARS
+    if Config.currentBar > count then Config.currentBar = count end
+    if Config.currentBar < 1 then Config.currentBar = 1 end
+
     local values, order = {}, {}
     for i, def in ipairs(ns.BARS) do
         local key = tostring(i)
@@ -71,6 +76,43 @@ local function BuildBarSelector(parent, y)
     _, h = W:Toggle(parent, L["Enabled"], y,
         function() return c.enabled ~= false end,
         function(v) c.enabled = v; ns.Events:Fire(MSG.VISIBILITY_CHANGED) end); y = y - h
+
+    -- Add a new custom bar (up to the cap).
+    if ns.DB.CanAddBar and ns.DB:CanAddBar() then
+        _, h = W:Button(parent, L["Add Bar"], y, function()
+            local idx = ns.DB:AddBar()
+            if idx then Config.currentBar = idx end
+            Config:RefreshOpen()
+        end); y = y - h
+    end
+
+    -- Rename / remove only for custom bars (index >= 3; main + minimap are fixed).
+    if Config.currentBar > 2 then
+        _, h = W:Button(parent, L["Rename Bar"], y, function()
+            local cur = Config.currentBar
+            if EllesmereUI and EllesmereUI.ShowInputPopup then
+                EllesmereUI:ShowInputPopup({
+                    title       = L["Rename Bar"],
+                    placeholder = (ns.BARS[cur] and ns.BARS[cur].label) or "",
+                    onConfirm   = function(text) ns.DB:RenameBar(cur, text); Config:RefreshOpen() end,
+                })
+            end
+        end); y = y - h
+
+        _, h = W:Button(parent, L["Remove Bar"], y, function()
+            local cur = Config.currentBar
+            local function doRemove()
+                ns.DB:RemoveBar(cur)
+                if Config.currentBar > #ns.BARS then Config.currentBar = #ns.BARS end
+                Config:RefreshOpen()
+            end
+            if EllesmereUI and EllesmereUI.ShowConfirmPopup then
+                EllesmereUI:ShowConfirmPopup({ title = L["Remove Bar"], message = L["Remove this bar?"], onConfirm = doRemove })
+            else
+                doRemove()
+            end
+        end); y = y - h
+    end
 
     return y
 end
@@ -336,6 +378,13 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.9-alpha1|r",
+    "- You can now create more than two bars: up to 10 in total (Main + Minimap",
+    "  plus up to 8 extra). Each bar is fully independent.",
+    "- Bar selector now has Add Bar, Rename Bar and Remove Bar. Main and Minimap",
+    "  are fixed; extra bars are free-floating and can be named and moved.",
+    "- Larger structural change, so this ships as an alpha first.",
+    "",
     "|cffad00ffVersion 1.8|r",
     "- New General tab (account-wide): Window Scale for the config window, and a",
     "  Minimap Button on/off toggle.",

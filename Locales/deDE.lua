@@ -204,3 +204,9 @@ L["Deposited"] = "Eingezahlt"
 L["Guild Bank"] = "Gildenbank"
 L["Not in a guild."] = "In keiner Gilde."
 L["Open the guild bank to read its gold."] = "Oeffne die Gildenbank, um ihr Gold zu lesen."
+
+-- v1.9 multi-bar
+L["Add Bar"] = "Leiste hinzufuegen"
+L["Remove Bar"] = "Leiste entfernen"
+L["Rename Bar"] = "Leiste umbenennen"
+L["Remove this bar?"] = "Diese Leiste entfernen?"

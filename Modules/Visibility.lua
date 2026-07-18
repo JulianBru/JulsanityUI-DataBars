@@ -73,9 +73,11 @@ function Vis:ApplyOne(bar)
     end
 end
 
---- Apply to every bar.
+--- Apply to every active bar.
 function Vis:ApplyAll()
-    for i = 1, #ns.Bars do self:ApplyOne(ns.Bars[i]) end
+    for i = 1, (ns.NUM_BARS or #ns.Bars) do
+        if ns.Bars[i] then self:ApplyOne(ns.Bars[i]) end
+    end
 end
 
 --- Convenience: Apply(bar) for one, Apply() for all.

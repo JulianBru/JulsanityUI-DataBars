@@ -18,7 +18,7 @@ ns.DB = DB
 local U  = ns.Util
 local D  = ns.Debug
 
-DB.SCHEMA_VERSION = 2
+DB.SCHEMA_VERSION = 3
 
 --------------------------------------------------------------------------------
 --  Defaults
@@ -75,8 +75,12 @@ end
 -- Build a fresh default profile (two bars).
 local function DefaultProfile()
     local main = BaseBar()
+    main.kind = "main"
+    main.id   = "Main"
 
     local mm = BaseBar()
+    mm.kind              = "minimap"
+    mm.id                = "Minimap"
     mm.attach            = "minimap"          -- sit under the minimap by default
     mm.layout.width      = 200
     mm.behavior.numSlots = 2
@@ -86,8 +90,24 @@ local function DefaultProfile()
 
     return {
         bars     = { main, mm },
+        barSeq   = 0,             -- monotonic counter for stable custom-bar ids
         advanced = { debug = false },
     }
+end
+
+-- Build a fresh free-floating custom bar config (index 3+).
+local function NewCustomBar(uid, ordinal)
+    local b = BaseBar()
+    b.kind               = "custom"
+    b.id                 = "Custom" .. uid
+    b.name               = "Bar " .. ordinal
+    b.attach             = "free"
+    b.layout.autoSize    = false
+    b.layout.width       = 250
+    b.behavior.numSlots  = 2
+    b.behavior.slots     = { "None", "None" }
+    b.position           = { point = "CENTER", relPoint = "CENTER", x = 0, y = -240 - (ordinal - 3) * 26 }
+    return b
 end
 
 local DEFAULT_PROFILE = DefaultProfile()
@@ -131,6 +151,30 @@ local migrations = {
             end
         end
     end,
+    -- v2 -> v3: tag bars with kind/id/name and add the custom-bar id counter.
+    [2] = function(svTable)
+        for _, prof in pairs(svTable.profiles or {}) do
+            if type(prof) == "table" and type(prof.bars) == "table" then
+                if prof.bars[1] then
+                    prof.bars[1].kind = prof.bars[1].kind or "main"
+                    prof.bars[1].id   = prof.bars[1].id or "Main"
+                end
+                if prof.bars[2] then
+                    prof.bars[2].kind = prof.bars[2].kind or "minimap"
+                    prof.bars[2].id   = prof.bars[2].id or "Minimap"
+                end
+                for i = 3, #prof.bars do
+                    local b = prof.bars[i]
+                    if type(b) == "table" then
+                        b.kind = b.kind or "custom"
+                        b.id   = b.id or ("Custom" .. i)
+                        b.name = b.name or ("Bar " .. i)
+                    end
+                end
+                prof.barSeq = prof.barSeq or math.max(0, #prof.bars - 2)
+            end
+        end
+    end,
 }
 
 local function RunMigrations()
@@ -156,6 +200,7 @@ end
 
 local function BindActiveProfile()
     profile = EnsureProfile(activeName)
+    if ns.RebuildBarDefs then ns.RebuildBarDefs() end   -- keep ns.BARS in sync
     D.SetEnabled(profile.advanced and profile.advanced.debug)
 end
 
@@ -244,6 +289,54 @@ end
 
 function DB:Snapshot()
     return U.DeepCopy(profile)
+end
+
+--------------------------------------------------------------------------------
+--  Dynamic bars (main + minimap are fixed; indices 3+ are custom)
+--------------------------------------------------------------------------------
+function DB:BarCount()
+    return (profile and profile.bars and #profile.bars) or 0
+end
+
+function DB:CanAddBar()
+    return self:BarCount() < (ns.MAX_BARS or 10)
+end
+
+-- Append a new custom bar. Returns its index, or false if at the cap.
+function DB:AddBar()
+    if not (profile and profile.bars) then return false end
+    if #profile.bars >= (ns.MAX_BARS or 10) then return false end
+    profile.barSeq = (profile.barSeq or 0) + 1
+    local ordinal = #profile.bars + 1
+    profile.bars[ordinal] = NewCustomBar(profile.barSeq, ordinal)
+    if ns.RebuildBarDefs then ns.RebuildBarDefs() end
+    D.Log("added bar #%d (id Custom%d)", ordinal, profile.barSeq)
+    ns.Events:Fire(ns.MSG.PROFILE_CHANGED)
+    return ordinal
+end
+
+-- Remove a custom bar (index >= 3). Main/minimap are protected.
+function DB:RemoveBar(index)
+    if not (profile and profile.bars) then return false end
+    if type(index) ~= "number" or index <= 2 then return false end
+    if not profile.bars[index] then return false end
+    table.remove(profile.bars, index)
+    if ns.RebuildBarDefs then ns.RebuildBarDefs() end
+    D.Log("removed bar #%d (%d left)", index, #profile.bars)
+    ns.Events:Fire(ns.MSG.PROFILE_CHANGED)
+    return true
+end
+
+-- Rename a custom bar (index >= 3).
+function DB:RenameBar(index, name)
+    if not (profile and profile.bars and profile.bars[index]) then return false end
+    if index <= 2 then return false end
+    if type(name) == "string" then name = name:gsub("^%s+", ""):gsub("%s+$", "") end
+    if not name or name == "" then return false end
+    profile.bars[index].name = name
+    if ns.RebuildBarDefs then ns.RebuildBarDefs() end
+    ns.Events:Fire(ns.MSG.PROFILE_CHANGED)
+    return true
 end
 
 --------------------------------------------------------------------------------

@@ -26,15 +26,52 @@ ns.ADDON      = ADDON_NAME            -- "JulsanityUI_DataBars"
 ns.FOLDER     = ADDON_NAME            -- folder name (used by EUI integrations)
 ns.UNLOCK_KEY = "JDB_DataBar"         -- base key for EllesmereUI unlock elements (per-bar suffix added)
 
--- Bar definitions. Exactly two fixed bars: the main bar (follows the chat
--- width when Auto Size is on) and the minimap bar (follows the minimap width
--- and anchors beneath it by default). Each bar has its own config block
--- (profile.bars[index]) and its own anchor / unlock element.
+-- Bar definitions. Two fixed bars always exist: the main bar (follows the chat
+-- width when Auto Size is on) and the minimap bar (follows the minimap width and
+-- anchors beneath it by default). Beyond those, the user may create up to
+-- ns.MAX_BARS total free-floating, named "custom" bars. Each bar has its own
+-- config block (profile.bars[index]) and its own anchor / unlock element.
+--
+-- ns.BARS holds the *runtime* def list, regenerated from the active profile by
+-- ns.RebuildBarDefs(). It starts as the two fixed defs so early code has a valid
+-- list before the profile is bound.
+ns.MAX_BARS = 10   -- hard cap: main + minimap + up to 8 custom bars
+
 ns.BARS = {
-    { id = "Main",    label = "Main Bar",    widthSource = "chat",    attachable = false },
-    { id = "Minimap", label = "Minimap Bar", widthSource = "minimap", attachable = true, attachFrameName = "Minimap" },
+    { id = "Main",    label = "Main Bar",    kind = "main",    widthSource = "chat",    attachable = false },
+    { id = "Minimap", label = "Minimap Bar", kind = "minimap", widthSource = "minimap", attachable = true, attachFrameName = "Minimap" },
 }
 ns.NUM_BARS = #ns.BARS
+
+-- Regenerate ns.BARS from the active profile's bars. Bars 1/2 are always the
+-- fixed main + minimap bars; indices 3+ are free-floating, named custom bars.
+function ns.RebuildBarDefs()
+    local prof = ns.Cfg and ns.Cfg()
+    local defs = {}
+    if prof and prof.bars then
+        for i, c in ipairs(prof.bars) do
+            local kind = c.kind or (i == 1 and "main") or (i == 2 and "minimap") or "custom"
+            if kind == "main" then
+                defs[i] = { id = "Main", label = "Main Bar", kind = "main",
+                            widthSource = "chat", attachable = false }
+            elseif kind == "minimap" then
+                defs[i] = { id = "Minimap", label = "Minimap Bar", kind = "minimap",
+                            widthSource = "minimap", attachable = true, attachFrameName = "Minimap" }
+            else
+                defs[i] = { id = c.id or ("Custom" .. i), label = c.name or ("Bar " .. i),
+                            kind = "custom", widthSource = "manual", attachable = false }
+            end
+        end
+    else
+        defs = {
+            { id = "Main",    label = "Main Bar",    kind = "main",    widthSource = "chat",    attachable = false },
+            { id = "Minimap", label = "Minimap Bar", kind = "minimap", widthSource = "minimap", attachable = true, attachFrameName = "Minimap" },
+        }
+    end
+    ns.BARS = defs
+    ns.NUM_BARS = #defs
+    return defs
+end
 
 -- Resolve version from TOC metadata (single source of truth).
 do

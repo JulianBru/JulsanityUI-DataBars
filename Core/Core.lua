@@ -34,7 +34,7 @@ function addon:OnEnable()
         if ns.Events and ns.MSG then ns.Events:Fire(ns.MSG.ACCENT_CHANGED) end
     end)
 
-    D.Log("enabled - %d bars, %d datatexts available", #ns.Bars, ns.Registry:Count())
+    D.Log("enabled - %d bars, %d datatexts available", ns.NUM_BARS or #ns.Bars, ns.Registry:Count())
 end
 
 local function ShowHelp()

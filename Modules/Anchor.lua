@@ -14,7 +14,10 @@ local D = ns.Debug
 
 local ATTACH_GAP = 2   -- px gap between the minimap and the bar when attached
 
-local function KeyFor(bar) return ns.UNLOCK_KEY .. "_" .. bar.def.id end
+-- Unlock elements are keyed by bar INDEX (a fixed set of ns.MAX_BARS is
+-- registered once), so add/remove of custom bars just lights slots up or down.
+local function KeyForIndex(i) return ns.UNLOCK_KEY .. "_" .. i end
+local function KeyFor(bar) return KeyForIndex(bar.index) end
 
 --- Place a bar at its saved position (or attached under the minimap).
 function Anchor:ApplyPosition(bar)
@@ -35,18 +38,27 @@ function Anchor:ApplyPosition(bar)
     f:SetPoint(p.point or "CENTER", UIParent, p.relPoint or "CENTER", p.x or 0, p.y or -200)
 end
 
---- Apply positions for every bar.
+--- Apply positions for every active bar.
 function Anchor:ApplyAll()
-    for i = 1, #ns.Bars do self:ApplyPosition(ns.Bars[i]) end
+    for i = 1, (ns.NUM_BARS or #ns.Bars) do
+        if ns.Bars[i] then self:ApplyPosition(ns.Bars[i]) end
+    end
 end
 
---- Reset one bar to its default position/attach and re-apply.
+--- Reset one bar to its default position/attach and re-apply. Custom bars have
+--- no fixed default, so they fall back to a sensible centred free position.
 function Anchor:Reset(bar)
     if not bar then return end
-    local def = ns.DEFAULT_PROFILE.bars[bar.index]
     local c = ns.BarCfg(bar.index)
-    c.attach = def.attach
-    c.position = { point = def.position.point, relPoint = def.position.relPoint, x = def.position.x, y = def.position.y }
+    if not c then return end
+    local def = ns.DEFAULT_PROFILE.bars and ns.DEFAULT_PROFILE.bars[bar.index]
+    if def then
+        c.attach = def.attach
+        c.position = { point = def.position.point, relPoint = def.position.relPoint, x = def.position.x, y = def.position.y }
+    else
+        c.attach = "free"
+        c.position = { point = "CENTER", relPoint = "CENTER", x = 0, y = -240 }
+    end
     self:ApplyPosition(bar)
     D.Log("anchor reset (%s)", bar.def.id)
 end
@@ -67,45 +79,50 @@ function Anchor:Register()
     end
     self._registered = true
 
+    -- Register a fixed set of MAX_BARS elements, each bound to a bar index and
+    -- reading its live instance/config. Elements past the current bar count
+    -- report themselves hidden until that bar is created.
     local elements = {}
-    for i = 1, #ns.Bars do
-        local bar = ns.Bars[i]
+    for i = 1, (ns.MAX_BARS or 10) do
+        local idx = i
         elements[i] = {
-            key   = KeyFor(bar),
-            label = bar.def.label,
+            key   = KeyForIndex(idx),
+            label = (idx == 1 and "Main Bar") or (idx == 2 and "Minimap Bar") or ("DataBar " .. idx),
             group = "JulsanityUI",
-            order = 500 + i,
+            order = 500 + idx,
 
-            getFrame = function() return bar.frame end,
+            getFrame = function() local b = ns.Bars[idx]; return b and b.frame end,
             getSize  = function()
-                local f = bar.frame
+                local b = ns.Bars[idx]; local f = b and b.frame
                 if f then return f:GetWidth(), f:GetHeight() end
                 return 0, 0
             end,
             isHidden = function()
-                local c = ns.BarCfg(bar.index)
-                local f = bar.frame
-                return (c.enabled == false) or (not f) or (not f:IsShown())
+                if idx > (ns.NUM_BARS or 0) then return true end
+                local c = ns.BarCfg(idx)
+                local b = ns.Bars[idx]; local f = b and b.frame
+                return (not c) or (c.enabled == false) or (not f) or (not f:IsShown())
             end,
 
             savePosition = function(_, point, relPoint, x, y)
-                local c = ns.BarCfg(bar.index)
+                local c = ns.BarCfg(idx)
+                if not c then return end
                 c.attach = "free"
                 c.position = c.position or {}
                 c.position.point, c.position.relPoint, c.position.x, c.position.y = point, relPoint, x, y
                 if not (EllesmereUI and EllesmereUI._unlockActive) then
-                    Anchor:ApplyPosition(bar)
+                    Anchor:ApplyPosition(ns.Bars[idx])
                 end
             end,
             loadPosition  = function()
-                local c = ns.BarCfg(bar.index)
+                local c = ns.BarCfg(idx); local b = ns.Bars[idx]
                 -- While attached under the minimap, let unlock mode read the live
                 -- position instead of a saved one.
-                if bar.def.attachable and c.attach == "minimap" then return nil end
-                return c.position
+                if b and b.def and b.def.attachable and c and c.attach == "minimap" then return nil end
+                return c and c.position
             end,
-            clearPosition = function() Anchor:Reset(bar) end,
-            applyPosition = function() Anchor:ApplyPosition(bar) end,
+            clearPosition = function() if ns.Bars[idx] then Anchor:Reset(ns.Bars[idx]) end end,
+            applyPosition = function() if ns.Bars[idx] then Anchor:ApplyPosition(ns.Bars[idx]) end end,
         }
     end
 

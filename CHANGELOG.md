@@ -3,6 +3,29 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.9-alpha1] — 2026-07-18
+
+More than two bars. This is a larger, structural change, so it ships as an
+alpha first.
+
+### Added
+- **Multiple bars.** You can now create additional data bars beyond the fixed
+  Main and Minimap bars — up to 10 in total (so up to 8 extra). Each extra bar
+  is free-floating and has its own fully independent layout, appearance,
+  behaviour, datatexts and position.
+- **Bar management** in the Layout / Appearance / Behavior tabs' bar selector:
+  - **Add Bar** — create a new custom bar (until the cap of 10 is reached).
+  - **Rename Bar** — give a custom bar its own name (e.g. "Combat", "Info").
+  - **Remove Bar** — delete a custom bar (with a confirmation). The Main and
+    Minimap bars are fixed and cannot be removed.
+- New custom bars auto-fit their width to their content and can be moved in
+  EllesmereUI's Unlock/Edit mode like the existing bars.
+
+### Changed
+- The bar system is now fully dynamic instead of a hard-coded pair of bars.
+  Existing profiles are migrated automatically; your Main and Minimap bars are
+  preserved exactly as they were.
+
 ## [1.8] — 2026-07-18
 
 A General tab, a minimap button, and a batch of new datatexts.

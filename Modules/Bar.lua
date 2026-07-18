@@ -19,18 +19,37 @@ local max = math.max
 --  Helpers
 --------------------------------------------------------------------------------
 
--- Iterate every built bar instance.
+-- Iterate every ACTIVE bar instance (1..NUM_BARS; removed custom bars are
+-- kept as hidden, pooled instances beyond that range and skipped here).
 function Bar:ForEach(fn)
-    for i = 1, #ns.Bars do fn(ns.Bars[i], i) end
+    local n = ns.NUM_BARS or #ns.Bars
+    for i = 1, n do
+        if ns.Bars[i] then fn(ns.Bars[i], i) end
+    end
 end
 
--- Resolve the auto-size reference width for a bar (chat vs minimap).
+-- Resolve the auto-size reference width for a bar. Main follows the chat frame,
+-- the minimap bar the minimap; custom bars fit their content.
 local function AutoWidth(bar)
-    if bar.def.widthSource == "minimap" then
+    local ws = bar.def.widthSource
+    if ws == "minimap" then
         local mm = _G[bar.def.attachFrameName or "Minimap"]
         return (mm and mm:GetWidth()) or 200
+    elseif ws == "chat" then
+        return (ChatFrame1 and ChatFrame1:GetWidth()) or 400
     end
-    return (ChatFrame1 and ChatFrame1:GetWidth()) or 400
+    -- custom / manual: fit to the summed content width of its slots.
+    local c = ns.BarCfg(bar.index)
+    if not c then return 200 end
+    local n = max(1, c.behavior.numSlots or 1)
+    local pad, sp = c.layout.padding or 0, c.layout.spacing or 0
+    local total = 0
+    for i = 1, n do
+        local slot = ns.Slot.Get(bar, i)
+        local w = (slot and slot.text and slot.text:GetStringWidth() or 0) + TEXT_PAD * 2
+        total = total + max(w, MIN_SLOT_W)
+    end
+    return total + 2 * pad + sp * (n - 1)
 end
 
 --------------------------------------------------------------------------------
@@ -65,31 +84,56 @@ local function BuildFrame(bar)
     f._bar = bar
 
     -- Follow the reference frame's width while Auto Size is on (horizontal).
-    local refName = (bar.def.widthSource == "minimap") and (bar.def.attachFrameName or "Minimap") or "ChatFrame1"
-    local ref = _G[refName]
-    if ref and not bar._sizeHooked then
-        bar._sizeHooked = true
-        ref:HookScript("OnSizeChanged", function()
-            local c = ns.BarCfg(bar.index)
-            if c and c.layout.autoSize and c.layout.orientation ~= "VERTICAL" then
-                Bar.Layout(bar)
-            end
-        end)
+    -- Only the chat / minimap bars track an external frame; custom bars fit
+    -- their own content and re-layout via OnSlotUpdated instead.
+    local ws = bar.def.widthSource
+    if (ws == "minimap" or ws == "chat") and not bar._sizeHooked then
+        local refName = (ws == "minimap") and (bar.def.attachFrameName or "Minimap") or "ChatFrame1"
+        local ref = _G[refName]
+        if ref then
+            bar._sizeHooked = true
+            ref:HookScript("OnSizeChanged", function()
+                local c = ns.BarCfg(bar.index)
+                if c and c.layout.autoSize and c.layout.orientation ~= "VERTICAL" then
+                    Bar.Layout(bar)
+                end
+            end)
+        end
     end
 
     return f
 end
 
---- Create every bar instance + frame (idempotent).
+--- Create/reconcile every bar instance + frame (idempotent). Regenerates the
+--- def list from the profile, (re)builds instances for the active bars, and
+--- hides any instances left over from removed custom bars. Instances are keyed
+--- by index and reused (frame + slot pool persist), so a removed bar's slot
+--- simply re-renders the bar that shifted into its place.
 function Bar:BuildAll()
-    for i, def in ipairs(ns.BARS) do
+    if ns.RebuildBarDefs then ns.RebuildBarDefs() end
+    local defs = ns.BARS
+
+    for i = 1, #defs do
         local bar = ns.Bars[i]
         if not bar then
-            bar = { index = i, def = def, pool = {} }
+            bar = { index = i, pool = {} }
             ns.Bars[i] = bar
         end
+        bar.def = defs[i]
         BuildFrame(bar)
+        if bar.frame then bar.frame:Show() end
     end
+
+    -- Hide instances beyond the active bar count (removed custom bars).
+    for i = #defs + 1, #ns.Bars do
+        local bar = ns.Bars[i]
+        if bar and bar.frame then
+            if ns.Slot and ns.Slot.HideFrom then ns.Slot.HideFrom(bar, 0) end
+            bar.frame:Hide()
+        end
+    end
+
+    ns.NUM_BARS = #defs
     return ns.Bars
 end
 
