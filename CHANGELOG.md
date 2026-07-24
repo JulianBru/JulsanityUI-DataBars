@@ -3,10 +3,9 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
-## [1.9-alpha1] — 2026-07-18
+## [1.9] — 2026-07-18
 
-More than two bars. This is a larger, structural change, so it ships as an
-alpha first.
+More than two bars.
 
 ### Added
 - **Multiple bars.** You can now create additional data bars beyond the fixed

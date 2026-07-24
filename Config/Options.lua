@@ -378,12 +378,11 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
-    "|cffad00ffVersion 1.9-alpha1|r",
+    "|cffad00ffVersion 1.9|r",
     "- You can now create more than two bars: up to 10 in total (Main + Minimap",
     "  plus up to 8 extra). Each bar is fully independent.",
     "- Bar selector now has Add Bar, Rename Bar and Remove Bar. Main and Minimap",
     "  are fixed; extra bars are free-floating and can be named and moved.",
-    "- Larger structural change, so this ships as an alpha first.",
     "",
     "|cffad00ffVersion 1.8|r",
     "- New General tab (account-wide): Window Scale for the config window, and a",
