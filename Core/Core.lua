@@ -23,6 +23,7 @@ function addon:OnEnable()
         ns.Bar.Layout(bar)
         ns.Visibility:ApplyOne(bar)
     end)
+    if ns.Bar.StartRefWatcher then ns.Bar:StartRefWatcher() end   -- follow chat/minimap width without tainting
     if ns.Window and ns.Window.RegisterCategory then ns.Window:RegisterCategory() end  -- Blizzard Options > AddOns
     if ns.MinimapButton and ns.MinimapButton.Create then ns.MinimapButton:Create() end  -- minimap icon + LDB launcher
     if ns.EUI.HookAccent then ns.EUI:HookAccent() end   -- re-render when EllesmereUI applies its accent

@@ -83,25 +83,44 @@ local function BuildFrame(bar)
     bar.frame = f
     f._bar = bar
 
-    -- Follow the reference frame's width while Auto Size is on (horizontal).
-    -- Only the chat / minimap bars track an external frame; custom bars fit
-    -- their own content and re-layout via OnSlotUpdated instead.
-    local ws = bar.def.widthSource
-    if (ws == "minimap" or ws == "chat") and not bar._sizeHooked then
-        local refName = (ws == "minimap") and (bar.def.attachFrameName or "Minimap") or "ChatFrame1"
-        local ref = _G[refName]
-        if ref then
-            bar._sizeHooked = true
-            ref:HookScript("OnSizeChanged", function()
+    return f
+end
+
+--------------------------------------------------------------------------------
+--  Reference-width follower (chat / minimap bars)
+--
+--  IMPORTANT: we must NOT HookScript a Blizzard frame such as
+--  ChatFrame1:OnSizeChanged. That hook can fire inside Blizzard's own secure
+--  execution -- e.g. while it handles an incoming raid/BN whisper, which resizes
+--  the chat frame -- and spread this addon's taint into protected chat code
+--  (ChatHistory_GetAccessID on BN_WHISPER). Instead, a private ticker on our own
+--  timer polls the reference width and re-lays-out a bar only when it actually
+--  changes. This never runs inside Blizzard's execution, so it cannot taint.
+--------------------------------------------------------------------------------
+local lastRefW = {}
+local function WatchRefWidths()
+    for i = 1, (ns.NUM_BARS or 0) do
+        local bar = ns.Bars[i]
+        if bar and bar.frame and bar.def then
+            local ws = bar.def.widthSource
+            if ws == "chat" or ws == "minimap" then
                 local c = ns.BarCfg(bar.index)
                 if c and c.layout.autoSize and c.layout.orientation ~= "VERTICAL" then
-                    Bar.Layout(bar)
+                    local w = AutoWidth(bar)
+                    if math.abs((lastRefW[i] or -1) - w) >= 1 then
+                        lastRefW[i] = w
+                        Bar.Layout(bar)
+                    end
                 end
-            end)
+            end
         end
     end
+end
 
-    return f
+--- Start the (single) reference-width poll ticker. Idempotent.
+function Bar:StartRefWatcher()
+    if self._refTicker then return end
+    self._refTicker = C_Timer.NewTicker(0.5, WatchRefWidths)
 end
 
 --- Create/reconcile every bar instance + frame (idempotent). Regenerates the

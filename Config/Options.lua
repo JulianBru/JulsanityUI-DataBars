@@ -378,6 +378,11 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.9.2|r",
+    "- Fixed a taint error that could interrupt chat / Battle.net whispers during",
+    "  combat. The main bar now follows the chat width via a private timer instead",
+    "  of hooking the chat frame.",
+    "",
     "|cffad00ffVersion 1.9|r",
     "- You can now create more than two bars: up to 10 in total (Main + Minimap",
     "  plus up to 8 extra). Each bar is fully independent.",

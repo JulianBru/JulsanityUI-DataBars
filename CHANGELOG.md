@@ -3,6 +3,15 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.9.2] — 2026-07-30
+
+### Fixed
+- Fixed a taint error ("execution tainted by JulsanityUI_DataBars") that could
+  interrupt chat and Battle.net whisper handling during combat/raids. The main
+  bar no longer hooks the chat frame's OnSizeChanged; it follows the chat and
+  minimap width via a private timer instead, so it can never spread taint into
+  Blizzard's protected chat code.
+
 ## [1.9] — 2026-07-18
 
 More than two bars.
