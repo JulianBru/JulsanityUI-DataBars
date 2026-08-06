@@ -3,6 +3,19 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.9.3] — 2026-08-06
+
+### Fixed
+- Fixed some datatexts (Friends, Guild, Difficulty, Gold, ...) showing blank on
+  a cold first login until a /reload. Their data arrives from the server shortly
+  after login; the addon now requests that data on login and re-draws all
+  datatexts a few times over the first seconds, so late-arriving values fill in
+  on their own.
+- Fixed an action-blocked error when clicking datatexts that open protected
+  Blizzard panels (Friends, Guild, PvP, Talents) during combat — e.g. opening
+  the Friends list while its Raid tab was selected. Those clicks are now
+  ignored in combat with a brief notice.
+
 ## [1.9.2] — 2026-07-30
 
 ### Fixed

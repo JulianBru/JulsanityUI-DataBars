@@ -138,6 +138,27 @@ function ns.Print(...)
 end
 
 --------------------------------------------------------------------------------
+--  Combat guard for datatext clicks
+--------------------------------------------------------------------------------
+-- Opening certain Blizzard panels from our (insecure) datatext click while in
+-- combat can cascade into protected calls -- e.g. ToggleFriendsFrame ->
+-- FriendsFrame restores its last tab -> RaidFrame:Show() (protected) ->
+-- ADDON_ACTION_BLOCKED. Click handlers that open such panels (Friends, Guild,
+-- PvP, talents, guild bank) call this first and bail out during combat.
+local combatWarnAt = 0
+function ns.CombatBlocked()
+    if InCombatLockdown and InCombatLockdown() then
+        local t = (GetTime and GetTime()) or 0
+        if t - combatWarnAt > 3 then
+            combatWarnAt = t
+            ns.Print("can't open that while in combat.")
+        end
+        return true
+    end
+    return false
+end
+
+--------------------------------------------------------------------------------
 --  DataText prefix visibility
 --------------------------------------------------------------------------------
 -- True unless the slot's bar is configured to hide datatext prefixes/labels

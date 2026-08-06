@@ -91,6 +91,7 @@ Reg({
         GameTooltip:Show()
     end,
     click = function()
+        if ns.CombatBlocked() then return end
         if PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassTalentsTab then
             PlayerSpellsUtil.OpenToClassTalentsTab()
         elseif ToggleTalentFrame then
@@ -333,7 +334,10 @@ Reg({
         end
         GameTooltip:Show()
     end,
-    click = function() if ToggleGuildFrame then ToggleGuildFrame() end end,
+    click = function()
+        if ns.CombatBlocked() then return end
+        if ToggleGuildFrame then ToggleGuildFrame() end
+    end,
     options = {
         { key = "shortNumber", type = "toggle", label = "Short Numbers", default = false },
     },

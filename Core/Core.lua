@@ -35,6 +35,24 @@ function addon:OnEnable()
         if ns.Events and ns.MSG then ns.Events:Fire(ns.MSG.ACCENT_CHANGED) end
     end)
 
+    -- Cold-login data readiness. Several datatexts (Friends, Guild, Difficulty,
+    -- Gold, ...) depend on data the server sends shortly AFTER login. On a fresh
+    -- login this can arrive later than our first draw, leaving those values blank
+    -- until a /reload. Proactively request that data and re-draw all datatexts a
+    -- few times over the first seconds so late-arriving values fill in on their
+    -- own. (On /reload the data is already cached, so this is effectively a no-op.)
+    local function RequestLateData()
+        if C_FriendList and C_FriendList.ShowFriends then pcall(C_FriendList.ShowFriends) end
+        if C_GuildInfo and C_GuildInfo.GuildRoster then pcall(C_GuildInfo.GuildRoster) end
+        if RequestRaidInfo then pcall(RequestRaidInfo) end
+    end
+    RequestLateData()
+    for _, delay in ipairs({ 2, 5, 10 }) do
+        C_Timer.After(delay, function()
+            if ns.Events and ns.MSG then ns.Events:Fire(ns.MSG.VALUES_CHANGED) end
+        end)
+    end
+
     D.Log("enabled - %d bars, %d datatexts available", ns.NUM_BARS or #ns.Bars, ns.Registry:Count())
 end
 

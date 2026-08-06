@@ -378,6 +378,12 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.9.3|r",
+    "- Fixed some datatexts (Friends, Guild, Difficulty, Gold) being blank on a",
+    "  cold first login until a /reload; late-loading values now fill in on their own.",
+    "- Fixed an action-blocked error when clicking datatexts that open protected",
+    "  panels (Friends, Guild, PvP, Talents) during combat; ignored in combat now.",
+    "",
     "|cffad00ffVersion 1.9.2|r",
     "- Fixed a taint error that could interrupt chat / Battle.net whispers during",
     "  combat. The main bar now follows the chat width via a private timer instead",

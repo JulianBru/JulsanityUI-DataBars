@@ -100,5 +100,8 @@ Reg({
         end
         GameTooltip:Show()
     end,
-    click = function() if TogglePVPUI then TogglePVPUI() end end,
+    click = function()
+        if ns.CombatBlocked() then return end
+        if TogglePVPUI then TogglePVPUI() end
+    end,
 })

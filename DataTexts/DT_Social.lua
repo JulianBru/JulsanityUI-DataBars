@@ -53,6 +53,7 @@ Reg({
         GameTooltip:Show()
     end,
     click = function()
+        if ns.CombatBlocked() then return end
         if ToggleFriendsFrame then ToggleFriendsFrame(1) end
     end,
 })
@@ -115,6 +116,7 @@ Reg({
         GameTooltip:Show()
     end,
     click = function()
+        if ns.CombatBlocked() then return end
         if ToggleGuildFrame then ToggleGuildFrame() end
     end,
 })
