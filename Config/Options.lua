@@ -252,7 +252,40 @@ local function BuildAppearance(parent, y)
     return y
 end
 
--- Render one per-slot datatext option (toggle/dropdown/slider); returns height.
+-- Widen the button the widget factory builds for an "input" option (it is a
+-- fixed 200px wide) and make its centered label truncate with an ellipsis
+-- instead of overflowing. The full text is shown in a hover tooltip.
+local INPUT_BTN_W = 320
+local function TuneInputButton(frame, fullText, helpText)
+    if not frame or not frame.GetChildren then return end
+    local btn
+    for _, child in ipairs({ frame:GetChildren() }) do
+        if child.GetObjectType and child:GetObjectType() == "Button" then btn = child; break end
+    end
+    if not btn then return end
+    btn:SetWidth(INPUT_BTN_W)
+    for _, r in ipairs({ btn:GetRegions() }) do
+        if r.GetObjectType and r:GetObjectType() == "FontString" then
+            r:SetWidth(INPUT_BTN_W - 16)   -- WoW truncates with "..." when wrapping is off
+            if r.SetWordWrap then r:SetWordWrap(false) end
+            if r.SetMaxLines then r:SetMaxLines(1) end
+            break
+        end
+    end
+    -- Hook (not SetScript) so the factory's hover styling keeps working.
+    btn:HookScript("OnEnter", function()
+        GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine(fullText, 1, 1, 1)
+        if helpText and helpText ~= "" then
+            GameTooltip:AddLine(helpText, 0.7, 0.7, 0.7, true)
+        end
+        GameTooltip:Show()
+    end)
+    btn:HookScript("OnLeave", function() GameTooltip:Hide() end)
+end
+
+-- Render one per-slot datatext option (toggle/dropdown/slider/input); returns height.
 local function RenderSlotOption(c, idx, opt, parent, y)
     local W = EllesmereUI.Widgets
     local label = "   " .. (L[opt.label] or opt.label)
@@ -276,6 +309,47 @@ local function RenderSlotOption(c, idx, opt, parent, y)
         _, hh = W:Dropdown(parent, label, y, vals, getv, setv, opt.order)
     elseif opt.type == "slider" then
         _, hh = W:Slider(parent, label, y, opt.min or 0, opt.max or 100, opt.step or 1, getv, setv)
+    elseif opt.type == "input" then
+        -- The widget factory has no edit box, so we render a button that shows
+        -- the current value and opens EllesmereUI's input popup when clicked.
+        local cur = getv()
+        local shown
+        if opt.describe then shown = opt.describe(cur) end
+        if not shown or shown == "" then
+            shown = (cur ~= nil and tostring(cur) ~= "") and tostring(cur) or (L["Auto"] or "Auto")
+        end
+        local btnText = label .. ": " .. shown
+        local helpText = opt.help and (L[opt.help] or opt.help) or nil
+        local rowFrame
+        rowFrame, hh = W:Button(parent, btnText, y, function()
+            if not (EllesmereUI and EllesmereUI.ShowInputPopup) then return end
+            EllesmereUI:ShowInputPopup({
+                title       = L[opt.label] or opt.label,
+                message     = opt.help and (L[opt.help] or opt.help) or nil,
+                placeholder = (cur ~= nil) and tostring(cur) or "",
+                onConfirm   = function(text)
+                    local v = text
+                    if opt.numeric then
+                        local t = tostring(text or ""):gsub("%s+", "")
+                        if t == "" then
+                            v = nil                     -- empty = back to default/auto
+                        else
+                            v = tonumber(t)
+                            if not v then
+                                ns.Print(L["Please enter a number."])
+                                return
+                            end
+                        end
+                    elseif type(v) == "string" then
+                        v = v:gsub("^%s+", ""):gsub("%s+$", "")
+                        if v == "" then v = nil end
+                    end
+                    setv(v)
+                    Config:RefreshOpen()               -- refresh the button label
+                end,
+            })
+        end)
+        TuneInputButton(rowFrame, btnText, helpText)
     end
     return hh or 0
 end
@@ -378,6 +452,23 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.10|r",
+    "- The Currency datatext can now track ANY currency: pick it for a slot and",
+    "  enter the currency's ID in the new 'Currency ID' field. Leave it empty to",
+    "  keep using the first currency tracked in your backpack.",
+    "  Tip: search the currency by name on wowhead.com - the ID is the number in",
+    "  the page's URL (.../currency=3008/valorstones -> 3008). The tooltip also",
+    "  lists your backpack-tracked currencies with their IDs.",
+    "- New options: Show Icon (scales with the bar's font size), Display",
+    "  (value / value+max / percent) and Short Numbers.",
+    "- The Currency tooltip now shows the cap, this week's earnings, whether the",
+    "  currency is account-wide, and its ID.",
+    "",
+    "|cffad00ffWhat's next|r",
+    "- We are designing a new settings panel for the next major version. With all",
+    "  the recent features the current panel is running out of room; the new one",
+    "  will give options more space and make them easier to find.",
+    "",
     "|cffad00ffVersion 1.9.3|r",
     "- Fixed some datatexts (Friends, Guild, Difficulty, Gold) being blank on a",
     "  cold first login until a /reload; late-loading values now fill in on their own.",

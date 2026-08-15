@@ -3,6 +3,36 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.10] — 2026-08-15
+
+Track any currency you like.
+
+### Added
+- **Currency by ID.** The Currency datatext can now track *any* currency:
+  select it for a slot and enter the currency's ID in the new **Currency ID**
+  field. Leave the field empty to keep the old behaviour (the first currency
+  tracked in your backpack). Each slot has its own ID, so you can show several
+  currencies side by side.
+  - **Finding an ID:** search for the currency by name on
+    [wowhead.com](https://www.wowhead.com) — the ID is the number in the URL of
+    the currency's page (e.g. `.../currency=3008/valorstones` → ID `3008`).
+    The datatext's tooltip also lists the currencies tracked in your backpack
+    together with their IDs, so you can look them up in-game.
+- **Show Icon** option — display the currency's icon next to the value. The icon
+  scales with the bar's font size, so it always fits the bar.
+- **Display** option — show the plain value, `value / maximum`, or the percentage
+  of the cap. Currencies whose cap applies to the total earned are handled
+  correctly.
+- **Short Numbers** option for the Currency datatext (e.g. `12.5K`).
+- The Currency tooltip now shows the cap, this week's earnings, whether the
+  currency is account-wide, and its ID.
+
+### What's next
+- We are designing a **new settings panel** for the next major version. With all
+  the features added recently, the current panel is running out of room — the
+  new design will give options more space and make them easier to find and
+  organise.
+
 ## [1.9.3] — 2026-08-06
 
 ### Fixed

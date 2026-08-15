@@ -153,45 +153,138 @@ Reg({
 })
 
 --------------------------------------------------------------------------------
---  Currency  -  tracked backpack currencies; tooltip: all tracked
+--  Currency  -  any currency by ID (or the first one tracked in the backpack)
 --------------------------------------------------------------------------------
+local function CurrencyInfo(id)
+    if not (C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo and id) then return nil end
+    local ok, info = pcall(C_CurrencyInfo.GetCurrencyInfo, id)
+    if ok and info and info.name and info.name ~= "" then return info end
+    return nil
+end
+
+-- Currencies the player tracks in the backpack (used when no ID is configured).
 local function TrackedCurrencies()
     local out = {}
     if not (C_CurrencyInfo and C_CurrencyInfo.GetBackpackCurrencyInfo) then return out end
-    local i = 1
-    while i <= 20 do
+    for i = 1, 20 do
         local info = C_CurrencyInfo.GetBackpackCurrencyInfo(i)
         if not info then break end
         out[#out + 1] = info
-        i = i + 1
     end
     return out
+end
+
+-- Resolve which currency a slot shows: the configured ID, else the first
+-- currency tracked in the backpack. Returns info, id.
+local function SlotCurrency(slot)
+    local id = tonumber(ns.SlotOpt(slot, "currencyID", nil))
+    if id then return CurrencyInfo(id), id end
+    local first = TrackedCurrencies()[1]
+    return first, first and first.currencyID
+end
+
+-- Inline icon markup, sized from the bar's font size so it always fits the bar
+-- (and scales with it) instead of a fixed pixel size.
+local function IconMarkup(slot, fileID)
+    if not fileID or not ns.SlotOpt(slot, "showIcon", true) then return "" end
+    local bar = slot and slot._bar
+    local bc  = bar and ns.BarCfg and ns.BarCfg(bar.index)
+    local fs  = (bc and bc.appearance and bc.appearance.fontSize) or 12
+    local size = math.max(8, math.min(fs + 2, 24))
+    return format("|T%s:%d:%d:0:0|t ", tostring(fileID), size, size)
+end
+
+-- Current/maximum for currencies that have a cap. Some caps apply to the total
+-- earned rather than the carried amount (useTotalEarnedForMaxQty).
+local function CapOf(info)
+    local maxQ = info and info.maxQuantity or 0
+    if maxQ <= 0 then return 0, 0 end
+    local cur = info.useTotalEarnedForMaxQty and (info.totalEarned or 0) or (info.quantity or 0)
+    return cur, maxQ
 end
 
 Reg({
     name = "Currency", label = "Currency", category = "Character",
     events = { "CURRENCY_DISPLAY_UPDATE", "PLAYER_ENTERING_WORLD" },
+    options = {
+        { key = "currencyID", type = "input", numeric = true, label = "Currency ID", default = nil,
+          help = "Enter a currency ID to track. Leave empty to use the first currency tracked in your backpack.",
+          describe = function(v)
+              local id = tonumber(v)
+              if not id then return L["Auto"] end
+              local info = CurrencyInfo(id)
+              return info and (id .. " - " .. info.name) or (id .. " (?)")
+          end },
+        { key = "showIcon", type = "toggle", label = "Show Icon", default = true },
+        { key = "display", type = "dropdown", label = "Display", default = "value",
+          values = { value = "Value", max = "Value / Max", percent = "Percent" },
+          order = { "value", "max", "percent" } },
+        { key = "shortNumber", type = "toggle", label = "Short Numbers", default = false },
+    },
     update = function(slot)
-        local list = TrackedCurrencies()
-        if #list == 0 then
-            slot.text:SetText("|cffaaaaaa" .. L["Currency"] .. "|r")
+        local info, id = SlotCurrency(slot)
+        if not info then
+            -- Configured but unknown ID, or nothing tracked at all.
+            slot.text:SetFormattedText("|cffaaaaaa%s|r", id and ("ID " .. id .. "?") or L["Currency"])
             return
         end
-        local c = list[1]
-        local icon = c.iconFileID and ("|T" .. c.iconFileID .. ":14:14:0:0|t ") or ""
-        slot.text:SetFormattedText("%s|cff%s%s|r", icon, ns.ValueHex(slot), BreakUpLargeNumbers(c.quantity or 0))
+        local hex   = ns.ValueHex(slot)
+        local short = ns.SlotOpt(slot, "shortNumber", false)
+        local function num(v) return short and U.ShortValue(v or 0) or BreakUpLargeNumbers(v or 0) end
+
+        local disp = ns.SlotOpt(slot, "display", "value")
+        local cur, maxQ = CapOf(info)
+        local body
+        if disp == "max" and maxQ > 0 then
+            body = format("|cff%s%s|r|cffaaaaaa/%s|r", hex, num(cur), num(maxQ))
+        elseif disp == "percent" and maxQ > 0 then
+            body = format("|cff%s%.0f%%|r", hex, cur / maxQ * 100)
+        else
+            body = format("|cff%s%s|r", hex, num(info.quantity))
+        end
+        slot.text:SetText(IconMarkup(slot, info.iconFileID) .. body)
     end,
     enter = function(slot)
-        local list = TrackedCurrencies()
+        local ar, ag, ab = ns.EUI:GetAccent()
+        local info, id = SlotCurrency(slot)
         Engine.OpenTooltip(slot)
         GameTooltip:AddLine(L["Currency"], 1, 1, 1)
-        if #list == 0 then
-            GameTooltip:AddLine(L["No currency tracked."], 0.7, 0.7, 0.7)
+
+        if info then
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddDoubleLine(info.name or "?", BreakUpLargeNumbers(info.quantity or 0), ar, ag, ab, 1, 1, 1)
+            local cur, maxQ = CapOf(info)
+            if maxQ > 0 then
+                GameTooltip:AddDoubleLine(L["Maximum"],
+                    format("%s / %s", BreakUpLargeNumbers(cur), BreakUpLargeNumbers(maxQ)), 1, 1, 1, 0.8, 0.8, 0.8)
+            end
+            if info.canEarnPerWeek and (info.maxWeeklyQuantity or 0) > 0 then
+                GameTooltip:AddDoubleLine(L["This Week"],
+                    format("%s / %s", BreakUpLargeNumbers(info.quantityEarnedThisWeek or 0),
+                                       BreakUpLargeNumbers(info.maxWeeklyQuantity)), 1, 1, 1, 0.8, 0.8, 0.8)
+            end
+            if info.isAccountWide then
+                GameTooltip:AddLine(L["Account-wide"], 0.6, 0.8, 1)
+            end
+            if id then
+                GameTooltip:AddLine(" ")
+                GameTooltip:AddDoubleLine(L["Currency ID"], tostring(id), 0.6, 0.6, 0.6, 0.6, 0.6, 0.6)
+            end
         else
             GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(id and format(L["Unknown currency ID: %s"], tostring(id)) or L["No currency tracked."], 1, 0.5, 0.5)
+        end
+
+        -- Also list the backpack-tracked currencies with their IDs, so the IDs
+        -- for the option are easy to look up in-game.
+        local list = TrackedCurrencies()
+        if #list > 0 then
+            GameTooltip:AddLine(" ")
+            GameTooltip:AddLine(L["Tracked in backpack"], ar, ag, ab)
             for _, c in ipairs(list) do
-                local icon = c.iconFileID and ("|T" .. c.iconFileID .. ":14:14:0:0|t ") or ""
-                GameTooltip:AddDoubleLine(icon .. (c.name or "?"), BreakUpLargeNumbers(c.quantity or 0), 1, 1, 1, 1, 1, 1)
+                local ic = c.iconFileID and ("|T" .. c.iconFileID .. ":14:14:0:0|t ") or ""
+                GameTooltip:AddDoubleLine(ic .. (c.name or "?") .. " |cff888888(" .. tostring(c.currencyID or "?") .. ")|r",
+                    BreakUpLargeNumbers(c.quantity or 0), 1, 1, 1, 1, 1, 1)
             end
         end
         GameTooltip:Show()
