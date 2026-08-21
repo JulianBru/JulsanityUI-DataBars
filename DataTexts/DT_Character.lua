@@ -349,6 +349,8 @@ Reg({
 --------------------------------------------------------------------------------
 --  Movement Speed  -  current run speed %; tooltip: rating bonus
 --------------------------------------------------------------------------------
+local speedCache = 0
+
 Reg({
     name = "Speed", label = "Movement Speed", category = "Character", interval = 0.5,
     options = {
@@ -356,8 +358,12 @@ Reg({
           values = { ["0"] = "0", ["1"] = "1" }, order = { "0", "1" } },
     },
     update = function(slot)
-        local current = GetUnitSpeed("player") or 0
-        local pct = current / BASE_MOVEMENT_SPEED * 100   -- BASE_MOVEMENT_SPEED = 7
+        -- ns.Num guards against 12.x "secret" values in combat (see Core/Init.lua);
+        -- fall back to the last readable speed so the value never breaks mid-fight.
+        local current = ns.Num(GetUnitSpeed("player"))
+        if current then speedCache = current end
+        current = speedCache
+        local pct = current / (BASE_MOVEMENT_SPEED or 7) * 100   -- BASE_MOVEMENT_SPEED = 7
         local pre = ns.WantPrefix(slot) and "Speed " or ""
         if (tonumber(ns.SlotOpt(slot, "decimals", "0")) or 0) >= 1 then
             slot.text:SetFormattedText("%s|cff%s%.1f%%|r", pre, ns.ValueHex(slot), pct)
@@ -369,10 +375,10 @@ Reg({
         Engine.OpenTooltip(slot)
         GameTooltip:AddLine("Movement Speed", 1, 1, 1)
         GameTooltip:AddLine(" ")
-        local pct = (GetUnitSpeed("player") or 0) / BASE_MOVEMENT_SPEED * 100
+        local pct = (ns.Num(GetUnitSpeed("player")) or speedCache) / (BASE_MOVEMENT_SPEED or 7) * 100
         GameTooltip:AddDoubleLine("Current", format("%.0f%%", pct), 1, 1, 1, 1, 1, 1)
         if GetCombatRatingBonus and CR_SPEED then
-            local bonus = GetCombatRatingBonus(CR_SPEED)
+            local bonus = ns.Num(GetCombatRatingBonus(CR_SPEED))
             if bonus and bonus ~= 0 then
                 GameTooltip:AddDoubleLine("Speed Rating", format("+%.2f%%", bonus), 1, 1, 1, 0.8, 0.8, 0.8)
             end

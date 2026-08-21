@@ -138,6 +138,24 @@ function ns.Print(...)
 end
 
 --------------------------------------------------------------------------------
+--  Secret values (Retail 12.x / Midnight)
+--------------------------------------------------------------------------------
+-- The 12.x client can hand "secret" numbers to tainted (addon) execution while
+-- in combat -- e.g. GetCombatRatingBonus / GetVersatilityBonus during a boss
+-- fight. Performing arithmetic on (or formatting) such a value raises a Lua
+-- error, so every API number we compute with must pass through here first.
+--
+-- Returns the number when it is safe to use, otherwise nil (caller decides on a
+-- fallback, usually the last known good value).
+local issecret = issecretvalue
+function ns.Num(v)
+    if v == nil then return nil end
+    if issecret and issecret(v) then return nil end
+    if type(v) ~= "number" then return nil end
+    return v
+end
+
+--------------------------------------------------------------------------------
 --  Combat guard for datatext clicks
 --------------------------------------------------------------------------------
 -- Opening certain Blizzard panels from our (insecure) datatext click while in

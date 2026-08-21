@@ -103,20 +103,29 @@ Reg({
 --------------------------------------------------------------------------------
 --  Secondary Stats  -  crit / haste / mastery / versatility
 --------------------------------------------------------------------------------
+-- In combat the 12.x client may return these stats as "secret" numbers that a
+-- tainted addon must not do arithmetic on (ns.Num filters those out). When that
+-- happens we keep showing the last value we were allowed to read, so the
+-- datatext stays stable during a fight instead of erroring or blanking out.
+local statCache = {}
+
 local function StatValue(kind)
+    local num = ns.Num
+    local v
     if kind == "crit" then
-        return (GetCritChance and GetCritChance()) or 0
+        v = num(GetCritChance and GetCritChance())
     elseif kind == "haste" then
-        return (GetHaste and GetHaste()) or 0
+        v = num(GetHaste and GetHaste())
     elseif kind == "mastery" then
-        return (GetMasteryEffect and GetMasteryEffect()) or (GetMastery and GetMastery()) or 0
+        v = num(GetMasteryEffect and GetMasteryEffect()) or num(GetMastery and GetMastery())
     elseif kind == "vers" then
         local cr = CR_VERSATILITY_DAMAGE_DONE
-        local a = (GetCombatRatingBonus and cr and GetCombatRatingBonus(cr)) or 0
-        local b = (GetVersatilityBonus and cr and GetVersatilityBonus(cr)) or 0
-        return a + b
+        local a = num(cr and GetCombatRatingBonus and GetCombatRatingBonus(cr))
+        local b = num(cr and GetVersatilityBonus and GetVersatilityBonus(cr))
+        if a and b then v = a + b else v = a or b end
     end
-    return 0
+    if v then statCache[kind] = v end
+    return statCache[kind] or 0
 end
 
 Reg({

@@ -3,6 +3,15 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.10.1] — 2026-08-21
+
+### Fixed
+- Fixed a Lua error that could spam during boss fights ("attempt to perform
+  arithmetic on a secret number value"). The 12.x client hands some stats to
+  addons as protected values while in combat; the Secondary Stats and Movement
+  Speed datatexts now detect those and keep showing the last readable value
+  instead of erroring.
+
 ## [1.10] — 2026-08-15
 
 Track any currency you like.

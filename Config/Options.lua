@@ -452,6 +452,11 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.10.1|r",
+    "- Fixed a Lua error that could spam during boss fights on the Secondary Stats",
+    "  and Movement Speed datatexts. In combat the 12.x client hides some stats",
+    "  from addons; those datatexts now keep showing the last readable value.",
+    "",
     "|cffad00ffVersion 1.10|r",
     "- The Currency datatext can now track ANY currency: pick it for a slot and",
     "  enter the currency's ID in the new 'Currency ID' field. Leave it empty to",
