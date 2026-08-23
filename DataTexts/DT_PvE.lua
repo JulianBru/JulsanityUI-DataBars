@@ -164,10 +164,12 @@ Reg({
 --    Right-click : choose the loot specialization
 --------------------------------------------------------------------------------
 local function ToggleSpec()
+    if ns.CombatBlocked() then return end
+    -- ns.Open uses securecall so our taint never enters Blizzard's UI code.
     if PlayerSpellsUtil and PlayerSpellsUtil.ToggleClassTalentOrSpecFrame then
-        PlayerSpellsUtil.ToggleClassTalentOrSpecFrame()
-    elseif ToggleTalentFrame then
-        pcall(ToggleTalentFrame)
+        ns.Open(PlayerSpellsUtil.ToggleClassTalentOrSpecFrame)
+    else
+        ns.Open("ToggleTalentFrame")
     end
 end
 

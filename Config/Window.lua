@@ -265,7 +265,7 @@ function Window:Toggle()
         -- Close the Blizzard Settings window (if open, e.g. opened from the
         -- Options > AddOns button) so our window isn't stacked behind it.
         if SettingsPanel and SettingsPanel:IsShown() then
-            HideUIPanel(SettingsPanel)
+            ns.Open("HideUIPanel", SettingsPanel)   -- securecall: never taint Blizzard's UI
         end
         self:ApplyScale()
         UpdateTabHighlight(self)

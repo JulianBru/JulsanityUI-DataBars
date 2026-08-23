@@ -452,6 +452,11 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.10.2|r",
+    "- Fixed 'action blocked' errors that could show up later in a Mythic+ run or",
+    "  raid after clicking a datatext that opens a Blizzard panel (Friends, Guild,",
+    "  Character, Talents, ...). Those panels are now opened safely.",
+    "",
     "|cffad00ffVersion 1.10.1|r",
     "- Fixed a Lua error that could spam during boss fights on the Secondary Stats",
     "  and Movement Speed datatexts. In combat the 12.x client hides some stats",

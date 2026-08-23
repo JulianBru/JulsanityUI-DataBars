@@ -72,7 +72,7 @@ Reg({
         end
         GameTooltip:Show()
     end,
-    click = function() if ToggleCalendar then ToggleCalendar() end end,
+    click = function() ns.Open("ToggleCalendar") end,
 })
 
 --------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ Reg({
         end
     end,
     click = function()
-        if WorldMapFrame:IsShown() then HideUIPanel(WorldMapFrame) else ShowUIPanel(WorldMapFrame) end
+        if WorldMapFrame:IsShown() then ns.Open("HideUIPanel", WorldMapFrame) else ns.Open("ShowUIPanel", WorldMapFrame) end
     end,
 })
 
@@ -321,5 +321,5 @@ Reg({
         if not any then GameTooltip:AddLine("All equipment at full durability.", 0.7, 0.7, 0.7) end
         GameTooltip:Show()
     end,
-    click = function() ToggleCharacter("PaperDollFrame") end,
+    click = function() ns.Open("ToggleCharacter", "PaperDollFrame") end,
 })

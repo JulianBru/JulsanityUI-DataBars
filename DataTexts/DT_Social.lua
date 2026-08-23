@@ -54,7 +54,7 @@ Reg({
     end,
     click = function()
         if ns.CombatBlocked() then return end
-        if ToggleFriendsFrame then ToggleFriendsFrame(1) end
+        ns.Open("ToggleFriendsFrame", 1)
     end,
 })
 
@@ -117,7 +117,7 @@ Reg({
     end,
     click = function()
         if ns.CombatBlocked() then return end
-        if ToggleGuildFrame then ToggleGuildFrame() end
+        ns.Open("ToggleGuildFrame")
     end,
 })
 

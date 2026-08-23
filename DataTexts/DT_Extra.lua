@@ -93,9 +93,9 @@ Reg({
     click = function()
         if ns.CombatBlocked() then return end
         if PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassTalentsTab then
-            PlayerSpellsUtil.OpenToClassTalentsTab()
-        elseif ToggleTalentFrame then
-            ToggleTalentFrame()
+            ns.Open(PlayerSpellsUtil.OpenToClassTalentsTab)
+        else
+            ns.Open("ToggleTalentFrame")
         end
     end,
 })
@@ -298,7 +298,7 @@ Reg({
         end
         GameTooltip:Show()
     end,
-    click = function() if ToggleCharacter then ToggleCharacter("TokenFrame") end end,
+    click = function() ns.Open("ToggleCharacter", "TokenFrame") end,
 })
 
 --------------------------------------------------------------------------------
@@ -438,7 +438,7 @@ Reg({
     end,
     click = function()
         if ns.CombatBlocked() then return end
-        if ToggleGuildFrame then ToggleGuildFrame() end
+        ns.Open("ToggleGuildFrame")
     end,
     options = {
         { key = "shortNumber", type = "toggle", label = "Short Numbers", default = false },

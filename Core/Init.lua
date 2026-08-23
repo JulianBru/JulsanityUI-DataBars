@@ -156,6 +156,29 @@ function ns.Num(v)
 end
 
 --------------------------------------------------------------------------------
+--  Taint-free panel opening
+--------------------------------------------------------------------------------
+-- Opening a Blizzard panel directly from our (insecure) click handler runs
+-- Blizzard's own code inside our tainted execution, which writes tainted values
+-- into its state. That taint persists, so a LATER secure event -- e.g.
+-- GROUP_ROSTER_UPDATE during a Mythic+ run -> RaidFrame_Update ->
+-- RaidGroupButton1:Hide() -- gets blocked and is blamed on us.
+--
+-- securecall() runs a function without propagating the caller's taint (Blizzard
+-- uses it for exactly this), so every panel toggle goes through here.
+--   ns.Open("ToggleFriendsFrame", 1)  or  ns.Open(SomeFunc, arg)
+function ns.Open(fn, ...)
+    if type(fn) == "string" then
+        if type(_G[fn]) ~= "function" then return end
+        if securecall then return securecall(fn, ...) end
+        return _G[fn](...)
+    end
+    if type(fn) ~= "function" then return end
+    if securecall then return securecall(fn, ...) end
+    return fn(...)
+end
+
+--------------------------------------------------------------------------------
 --  Combat guard for datatext clicks
 --------------------------------------------------------------------------------
 -- Opening certain Blizzard panels from our (insecure) datatext click while in

@@ -227,7 +227,7 @@ Reg({
         GameTooltip:AddDoubleLine(L["Total"], Money(grand), 1, 1, 1, 1, 0.82, 0)
         GameTooltip:Show()
     end,
-    click = function() ToggleCharacter("TokenFrame") end,
+    click = function() ns.Open("ToggleCharacter", "TokenFrame") end,
 })
 
 --------------------------------------------------------------------------------
@@ -285,7 +285,7 @@ Reg({
         end
         GameTooltip:Show()
     end,
-    click = function() ToggleCharacter("PaperDollFrame") end,
+    click = function() ns.Open("ToggleCharacter", "PaperDollFrame") end,
 })
 
 --------------------------------------------------------------------------------
@@ -436,7 +436,7 @@ Reg({
         end
         GameTooltip:Show()
     end,
-    click = function() if ToggleAllBags then ToggleAllBags() end end,
+    click = function() ns.Open("ToggleAllBags") end,
 })
 
 --------------------------------------------------------------------------------
@@ -504,5 +504,8 @@ Reg({
         end
         GameTooltip:Show()
     end,
-    click = function() ToggleCharacter("PaperDollFrame") if ReputationFrame and CharacterFrameTab3 then CharacterFrameTab3:Click() end end,
+    click = function()
+        ns.Open("ToggleCharacter", "PaperDollFrame")
+        if ReputationFrame and CharacterFrameTab3 then ns.Open(CharacterFrameTab3.Click, CharacterFrameTab3) end
+    end,
 })

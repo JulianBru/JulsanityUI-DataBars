@@ -3,6 +3,15 @@
 All notable changes to JulsanityUI DataBars are documented here.
 This project follows a simple 0.1-step versioning scheme.
 
+## [1.10.2] — 2026-08-22
+
+### Fixed
+- Fixed "action blocked" errors that could appear later in a Mythic+ run or raid
+  (e.g. `RaidGroupButton1:Hide()` when the group roster changed). Opening a
+  Blizzard panel from a datatext click used to leave traces in Blizzard's own
+  UI code, which then broke unrelated updates minutes later. Every panel a
+  datatext opens is now called in a way that can't affect Blizzard's code.
+
 ## [1.10.1] — 2026-08-21
 
 ### Fixed

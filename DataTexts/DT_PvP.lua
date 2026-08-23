@@ -102,6 +102,6 @@ Reg({
     end,
     click = function()
         if ns.CombatBlocked() then return end
-        if TogglePVPUI then TogglePVPUI() end
+        ns.Open("TogglePVPUI")
     end,
 })
