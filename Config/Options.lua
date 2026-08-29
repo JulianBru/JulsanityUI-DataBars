@@ -452,6 +452,10 @@ end
 
 -- Changelog shown by the Changelog button (keep in sync with CHANGELOG.md).
 local CHANGELOG_TEXT = table.concat({
+    "|cffad00ffVersion 1.10.3|r",
+    "- Fixed the remaining 'action blocked' error in Mythic+ and raids. Group",
+    "  roster updates are now processed outside Blizzard's own raid UI handling.",
+    "",
     "|cffad00ffVersion 1.10.2|r",
     "- Fixed 'action blocked' errors that could show up later in a Mythic+ run or",
     "  raid after clicking a datatext that opens a Blizzard panel (Friends, Guild,",

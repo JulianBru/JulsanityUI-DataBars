@@ -77,6 +77,38 @@ local function DoUpdate(slot, event, ...)
 end
 
 --------------------------------------------------------------------------------
+--  Deferred events
+--
+--  Some events are also handled by Blizzard's PROTECTED UI in the same dispatch.
+--  GROUP_ROSTER_UPDATE is the important one: Blizzard's RaidFrame_OnEvent calls
+--  RaidFrame_LoadUI() there, which loads the load-on-demand Blizzard_RaidUI
+--  addon and then updates protected raid buttons. If our (insecure) handler runs
+--  inside that same dispatch, our taint can end up in that path -- and a tainted
+--  load taints the whole raid UI for the rest of the session, so every later
+--  RaidGroupFrame_Update is blocked ("RaidGroupButton1:Hide()").
+--
+--  For these events we do not update inline: we hand off to a timer so our work
+--  runs a frame later, in a call stack of our own, completely outside Blizzard's
+--  dispatch. Datatexts re-read the current state anyway, so nothing is lost.
+--------------------------------------------------------------------------------
+local DEFERRED_EVENTS = {
+    GROUP_ROSTER_UPDATE  = true,
+    RAID_ROSTER_UPDATE   = true,
+    PARTY_LEADER_CHANGED = true,
+    GROUP_JOINED         = true,
+    GROUP_LEFT           = true,
+}
+
+local function DoUpdateDeferred(slot, event)
+    if slot._deferPending then return end   -- coalesce bursts (roster spam)
+    slot._deferPending = true
+    C_Timer.After(0, function()
+        slot._deferPending = false
+        if slot._spec then DoUpdate(slot, event) end
+    end)
+end
+
+--------------------------------------------------------------------------------
 --  Live tooltip refresh (opt-in via spec.tooltipRefresh = interval seconds)
 --
 --  While the cursor stays on a slot whose spec sets `tooltipRefresh`, the spec's
@@ -116,6 +148,7 @@ end
 --- clear scripts and text. Leaves the slot reusable (pooled).
 function Engine.Unbind(slot)
     StopTooltipRefresh(slot)
+    slot._deferPending = nil   -- drop any queued deferred update
     if slot._eventFrame then
         slot._eventFrame:UnregisterAllEvents()
         slot._eventFrame:SetScript("OnEvent", nil)
@@ -156,6 +189,11 @@ function Engine.Bind(slot, dtName)
             slot._eventFrame = ef
         end
         ef:SetScript("OnEvent", function(_, event, ...)
+            -- Never run inline for events Blizzard's protected UI handles too.
+            if DEFERRED_EVENTS[event] then
+                DoUpdateDeferred(slot, event)
+                return
+            end
             DoUpdate(slot, event, ...)
         end)
         for i = 1, #spec.events do
